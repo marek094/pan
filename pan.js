@@ -491,7 +491,7 @@ var main = function(e) {
     init();
     menu.load();
     menu.handler(document.querySelector('#menu .active')
-                 || document.querySelector('#menu a:firstChild') );
+                 || document.querySelector('#menu a') );
     sections().forEach( ({init: f}) => f());
 
     const handle = document.getElementById('handle');
