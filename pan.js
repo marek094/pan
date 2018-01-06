@@ -28,9 +28,9 @@ String.prototype.ifEmpty = function (val) {
 
 String.prototype.tagAs = function (tag, args = {}) {
   var res = '<' + tag;
-  const attr = Object.entries(args).map( ([k, v]) => k + '="' + v + '"').join(' ');
   if (attr != "") {
-    res += ' ' + attr;
+    res += ' ';
+    res += Object.entries(args).map( ([k, v]) => k + '="' + v + '"').join(' ');
   }
   res += '>';
   res += this.toString();
@@ -466,6 +466,10 @@ var pan = {
             a slouží pouze jako neoficiální uživatelká podpora ke hře.
             Bylo vytvořeno na začátku roku 2018
             <a href="http://marekcerny.com" target="_blank">Markem</a>.
+            </p>
+            <h4>GitHub</h4>
+            <p>Projekt sídlí a je ke stažení na
+              <a href="https://github.com/marek094/pan">GitHub.com</a>
             </p>
             <h4>Užitečné odkazy</h4>
             <ul>
