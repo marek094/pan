@@ -26,9 +26,9 @@ String.prototype.ifEmpty = function (val) {
   return this.length ? this : val;
 }
 
-String.prototype.tagAs = function (tag, args = {}) {
+String.prototype.tagAs = function (tag, args) {
   var res = '<' + tag;
-  if (args == {}) {
+  if (args) {
     res += ' ';
     res += Object.entries(args).map( ([k, v]) => k + '="' + v + '"').join(' ');
   }
