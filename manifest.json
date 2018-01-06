@@ -1,0 +1,25 @@
+{
+  "name": "PanHradu extension",
+  "description" : "Alert on Google Load",
+  "version" : "0.1",
+  "browser_action" : {},
+  "icons" : {},
+  "name" : "Auto alert",
+  "version" : "1.0",
+  "content_scripts": [
+    {
+      "matches":  ["http://www.panhradu.cz/main*"],
+      "js": ["panTabs/forum.js","pan.js"],
+      "css" : ["pan.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "background" : {
+    /* "scripts": ["panTabs/forum.js", "pan.js"] */
+  },
+  "web_accessible_resources": [
+    "posta.css",
+    "*"
+  ],
+  "manifest_version" : 2
+}

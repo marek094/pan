@@ -1,0 +1,324 @@
+
+#pan_extension {
+  position:fixed;
+  right:0;
+  top:130px;
+  bottom: 0px;
+  z-index: 1000;
+  border: rgb(73, 66, 66) solid;
+  border-left-color: rgb(148, 140, 131);
+  border-width: 5px 0 4px 2px;
+  border-radius: 24px;
+  border-bottom-right-radius: 0;
+  width: 220px;
+  /* _padding: 20px; */
+  height:auto;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+ul, li {
+  padding: 0;
+  margin: 0;
+  list-style-type: square;
+}
+ul {padding-left: 14px;}
+.content {
+  vertical-align: top;
+  color: #dcaf67;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  height: 100%;
+}
+.content table, .content tr, .content td, .content th {
+  margin:0;
+  padding: 0;
+  text-align: left;
+}
+.content tr {
+  color: #eacd86;
+}
+.content .units table {
+  color: #dcaf67;
+}
+.content .units td {
+  vertical-align: middle;
+  padding: 2px;
+}
+.content .units td:nth-child(2) {
+  background-image: url('http://www.panhradu.cz/i/t/bg_grass.gif');
+  border-radius: 1000px;
+  height: 32px !important;
+  width:  32px;
+  cursor: pointer;
+}
+.content .units td:nth-child(2) img {
+  width: 32px;
+  position:relative;
+  margin-top: -20px;
+  margin-left: -5px;
+}
+/* #content td:first-child img:last-child {
+  width: 50%;
+  position: relative;
+  margin-left: 10px;
+  margin-top: -20px;
+} */
+#table {
+  color: #eacd86;
+  font-size: 12px;
+}
+
+h1#heading {
+  padding:15px 40px 0 0;
+  text-align:center;
+  font-size:16px;
+  background: no-repeat 72px 0px url('http://www.panhradu.cz/i/u/dem_cr_v_3_3.gif');
+  line-height: 40px;
+  border-bottom-right-radius: 30px;
+  border-bottom-left-radius: 30px;
+  text-shadow: -2px 2px #000;
+  border-bottom: 1px solid #503c2f;
+  margin:-17px 5px 10px -5px;
+}
+h1#heading:hover {
+  background-image: url('http://www.panhradu.cz/i/u/dem_cr_v_3_3f.gif');
+}
+
+#table h3 {
+  padding: 0 10px;
+}
+
+#table p {
+  padding: 0 15px 0 5px;
+}
+
+.erb {
+  /* border:1px yellow solid; */
+  /* width:13px; */
+  height: 13px;
+  background: 4px -2px no-repeat #69762d;
+  border-radius: 10px;
+  padding: 9px 0 0 0;
+}
+.erb img {
+  /* width: 18px; */
+  position:absolute:
+  margin-left: -10px;
+}
+
+#handle {
+  position:relative;
+  left:0;
+  width:30px;
+  height:100%;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  background: #221718dd;
+}
+#handle .inner {
+  padding-top: 49px;
+}
+#handle .menu a {
+  display:block;
+  width:25px; /* +5px */
+  height:36px;
+  background:#1A1410;
+  line-height: 12px;
+  text-align: right;
+  padding-right: 3px;
+  vertical-align: middle;
+  text-decoration: none;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  /* border: 1px solid #15100d; */
+  border: 1px solid #452e26;
+  border-width: 2px 0 1px 2px;
+  margin: 0 0 2px 0;
+  text-shadow: -2px 2px #000;
+}
+#handle .menu a:hover {
+  background-color:#221718;
+}
+#handle .menu a.active {
+  background-color:#221718;
+}
+#handle .menu a.units.active {
+  background-image: url('/i/u/zbb_3_3.gif');
+  background-position: -20px -4px;
+}
+#handle .menu a.resources.active {
+  background-image: url('/i/u/sel_2_3.gif');
+  background-position: -20px -5px;
+}
+#handle .menu a.version.active {
+  /* background-image: url('http://panhradu.cz/i/u/drc_3_1f.gif'); */
+  background-image: url('/i/u/bk_2_3.gif');
+  background-position: -26px -9px;
+}
+#handle .menu a.post.active {
+  /* background-image: url('http://panhradu.cz/i/u/drc_3_1f.gif'); */
+  background-image: url('/i/u/pamt_b_3_3.gif');
+  background-position: -20px -6px;
+}
+
+#handle .menu a.fights.active {
+  /* background-image: url('/i/u/dwr_2_3f.gif'); */
+  /* background-position: -24px -16px; */
+  background-image: url('/i/u/elmm_3_2.gif');
+  background-position: -23px -4px;
+}
+
+
+#table {
+  border-top-right-radius: 20px;
+  background: #221718;
+  /* background-image: url('/i/pozadi/bc2.gif'); */
+  width:190px;
+  height:100%;
+  left:30px;
+  top:-100%;
+  position:relative;
+}
+#table .inner {
+  padding: 1px 5px 100px 5px;
+  /* color: #dcaf67; */
+  font-size: 12px;
+  /* background:#221718cc; */
+  /* background:#00000066; */
+}
+
+#content div p {
+  font-size: 13px;
+  line-height: 1.5;
+  /* padding: 0 0 0 10px; */
+  margin: 0;
+}
+
+.content .amount {
+  font-family: Verdana;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: right;
+  /* padding-right: 10px; */
+}
+
+.content table.amounts {
+  margin:0;
+  padding:0;
+  vertical-align: bottom;
+}
+
+.content table.amounts tbody {
+  padding-top: 5px;
+}
+.content table.amounts img {
+  width: 18px;
+}
+
+.content table.amounts small {
+  font-size: 65%;
+}
+
+.content table.amounts td, .content table.amounts th {
+   padding: 3px;
+}
+.content table.amounts td.amount {
+}
+
+.content table.fights, .content table.fights td {
+  margin: 0;
+  padding: 0;
+  table-layout: fixed;
+}
+.content table.fights {
+  border-spacing: 0;
+  width: 180px;
+  padding-bottom:1px;
+}
+.content table.fights tr {
+  padding: 2px 0;
+}
+.content table.fights td {
+  /* padding: 5px; */
+  /* height: 32px; */
+  /* overflow: hidden; */
+  /* table-layout: fixed; */
+  /* writing-mode: vertical-rl; */
+  /* word-break:keep-all; */
+  vertical-align: middle;
+}
+.content table.fights td img {
+  width: 32px;
+}
+.content table.fights td:nth-child(2),
+.content table.fights td:nth-child(3) {
+  background: url('/i/t/bg_grass.gif');
+  border-bottom: 1px solid #cb432a;
+  width:32px;
+  /* Note: overflow of right aligned text */
+  /* border-top: 1px solid #221718; */
+}
+.content table.fights td:nth-child(2) {
+  padding:1px 0 2px 1px;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+  width: 24px;
+}
+.content table.fights td:nth-child(3) {
+  padding:1px 2px 1px 0;
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+.content table.fights td:first-child {
+  padding-right: 4px;
+  text-align: right;
+  direction: rtl;
+}
+.content table.fights td:last-child {
+  padding-left: 4px;
+}
+.content table.fights td div {
+  display: inline-block;
+  /* height: 32px; */
+  /* padding: 2px 0 4px 0; */
+  /* width: 52px; */
+  line-height: 1.25em;
+  /* height: 3.75em; */
+  max-height: 39px;
+  /* transform: rotate(90deg); */
+  /* writing-mode: vertical-rl; */
+  /* -webkit-writing-mode: vertical-rl; */
+  /* word-break: break-all; */
+  hyphens: auto;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 100;
+}
+
+.content .iframe_wrap {
+  /* position: relative; */
+  /* height: 100vh; */
+  /* transform-box: border-box; */
+  /* overflow-x: hidden; */
+  /* position:absolute; */
+  /* margin-left: -4px; */
+  /* width: 189px; */
+}
+.content .iframe_wrap iframe {
+  width: 175px;
+  height: -webkit-calc(100% - 85px) !important;
+  border:0;
+  position: absolute;
+  /* bottom: 0; */
+  /* top: 0; */
+  /* bottom: 0; */
+  /* margin-top: -100px; */
+  margin-left: -5px;
+  /* transform: scale(0.25); */
+  /* transform-origin: 0 0; */
+  /* overflow-x: hidden; */
+  overflow-y: scroll;
+  overflow-x: hidden;
+  /* height:300px; */
+  z-index: 10030;
+}
