@@ -178,13 +178,21 @@ h1#heading:hover {
   left:30px;
   top:-100%;
   position:relative;
+  /* padding-bottom: 50px; */
 }
 #table .inner {
   padding: 1px 5px 100px 5px;
+  /* position: relative; */
   /* color: #dcaf67; */
   font-size: 12px;
   /* background:#221718cc; */
   /* background:#00000066; */
+}
+
+#content {
+  height: -webkit-calc(100% - 5px);
+  position: absolute;
+  width: 180px;
 }
 
 #content div p {
@@ -193,6 +201,7 @@ h1#heading:hover {
   /* padding: 0 0 0 10px; */
   margin: 0;
 }
+
 
 .content .amount {
   font-family: Verdana;
