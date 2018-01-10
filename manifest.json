@@ -20,5 +20,8 @@
     "posta.css",
     "pan.html"
   ],
+  "permissions": [
+    "storage"
+  ],
   "manifest_version" : 2
 }
