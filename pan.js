@@ -362,13 +362,13 @@ var pan = {
         // alert(Object.keys(pan.tabs.fights));
         const fs = Array.from(document.querySelectorAll('.unit'))
           .reduce( ([m, ps], u) => {
-            const {src:src, title:title, dataset:{id:id}, clientWidth:width} = u.querySelector('img.UI');
+            const {src:src, title:title, id:id, clientWidth:width} = u.querySelector('img.UI');
             const match = src.match(/(\w+(\d)_\d)f\.gif$/);
             if (!match) return [m, ps];
             const [,img, d] = match;
             const coor = [u.style.left, u.style.top].map( x => Math.round(parseInt(x) / 64));
             const size = Math.round(width / 64);
-            m[coor.join()] = {img: img, dir: d-1, id: parseInt(id), name: title, size: size};
+            m[coor.join()] = {img: img, dir: d-1, id: parseInt(id.slice(1)), name: title, size: size};
             // TODO : make (2x2) sizes work properly
             // console.log(size);
             for (let i=0; i < dirs[size].length; ++i) {
@@ -480,10 +480,12 @@ var pan = {
                   .concat(y.innerHTML)
                 );
               })
-            )
+            );
+            // alert(ab[0].id + ' $$ ' + ab[1].);
           });
 
-          // update();
+          update();
+          // alert('22');
           serverTime().then( (prom) => {
             let nextUpd = 60 - prom[5] + /*bias: */ 2;
             setTimeout( () => {
