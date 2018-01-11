@@ -210,11 +210,11 @@ var pan = {
       // console.log(target);
       const who = (target.className || " " ).split(/\s+/);
       pan.sections().forEach( section => {
+        if (1 + who.indexOf(section.name) && !section.isInit) {
+          section.isInit = true;
+          section.init();
+        }
         ['content', 'header'].forEach(part => {
-          if (1 + who.indexOf(section.name) && !section.isInit) {
-            section.isInit = true;
-            section.init();
-          }
           const el = document.getElementById(section.name + '_' + part);
           el && (el.style.display = 1+who.indexOf(section.name) ? 'block' : 'none');
         });
@@ -481,17 +481,12 @@ var pan = {
                 );
               })
             );
-            // alert(ab[0].id + ' $$ ' + ab[1].);
           });
 
           update();
-          // alert('22');
           serverTime().then( (prom) => {
             let nextUpd = 60 - prom[5] + /*bias: */ 2;
-            setTimeout( () => {
-              update();
-              setInterval(update, 60*1000);
-            }, nextUpd);
+            setTimeout( ()=>setInterval(update, 60*1000), nextUpd);
           });
       },
 
