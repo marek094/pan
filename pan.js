@@ -9,6 +9,9 @@ Array.prototype.groupBy = function (selector) { return this
   ;
 }
 
+Array.prototype.back = function () { return this[this.length-1] }
+Array.prototype.front = function () { return this[0] }
+
 Array.prototype.flat = function () { return this
   .reduce((xs, x) => xs.concat(x), [])
   ;
@@ -26,11 +29,12 @@ String.prototype.ifEmpty = function (val) {
   return this.length ? this : val;
 }
 
-String.prototype.tagAs = function (tag, args) {
-  var res = '<' + tag;
+String.prototype.tagAs = function (tag, args) { // k=='style' ? v : v
+  let serialize = a => Object.entries(a).map(([k, v])=>`${k}="${v}"`).join("");
+  let res = '<' + tag;
   if (args) {
     res += ' ';
-    res += Object.entries(args).map( ([k, v]) => k + '="' + v + '"').join(' ');
+    res += serialize(args);
   }
   res += '>';
   res += this.toString();
@@ -157,6 +161,7 @@ var pan = {
     var handle = document.getElementById('handle');
     var content = document.getElementById('content');
 
+    // serverTime().then(e=> console.log(e));
 
     chrome.storage.sync.get(['panHidden', 'selectedSection'], o => {
       if (o.panHidden === undefined) {
@@ -252,7 +257,7 @@ var pan = {
             // .filter(x => x)
             .map(x => (x && x[1]) ? x[1].tagAs('p', {class:'player_name'})
                                   : pC('Tvoje území'))
-            .join(pC(' a '))
+            .join(pC(' & '))
             .ifEmpty(pC(say('tohle území nikomu nepatří')))
             ;
           return res;
@@ -264,7 +269,6 @@ var pan = {
           let table = {'jídla': 0, 'dřeva': 0, 'kamene': 0, 'železa': 0};
           let images = {'jídla': 'food', 'dřeva': 'wood', 'kamene': 'stone', 'železa': 'iron'};
           let heaps = [...document.querySelectorAll('img.P')];
-          let add2 = (a, b) => a.map( (v,i) => v + b[i] );
 
           const sumRow = heaps
             .map(({title: t}) => t
@@ -282,6 +286,7 @@ var pan = {
               + "".tagAs('img', {src: 'i/s/'+img+'.gif', title: 'ležícího '+key, class: 'resource'})
             )
             .join('  ')
+            .tagAs('p')
             ;
 
           return res;
@@ -371,15 +376,17 @@ var pan = {
             return [m, ps];
           }, [{}, []])
           .pop()
-          .map( x => [ 'fight_' + x[0].id + '_' + x[1].id
-            , x.sort( ({id: x}, {id: y}) => x-y)
-            ]
+          .map( x => //[ 'fight_' + x[0].id + '_' + x[1].id
+            //,
+            x.sort( ({id: x}, {id: y}) => x-y)
+            //]
           )
           ;
 
+        // console.log(fs);
+
         pan.tabs.fights.content.innerHTML = fs
-          .map( ([id, ab]) => [ id,
-            ab
+          .map( ab => ab
               // TODO sort by owner
               .map( (u, i) =>
                 [ u.name
@@ -404,39 +411,82 @@ var pan = {
               )
               .map( (xs, i) => i==0 ? xs : xs.reverse())
               .flat()
-              .map(tagAs('td'))
+              .map(tagAs('th'))
               .join("")
-            ]
+              .tagAs('tr')
+              .concat( ""
+                .tagAs('div', {class: 'health_display'})
+                .tagAs('td', {
+                  colspan: 4,
+                  style: 'border: 0'
+                })
+                .tagAs('tr')
+              )
+              .concat( ab
+                .map(({id: id}) => ""
+                  .tagAs('div', {class: ['graph', 'fighting_'+id].join(' ')})
+                  .tagAs('td', {colspan: 2})
+                )
+                .join("")
+                .tagAs('tr')
+              )
+
           )
-          .map(([id, x]) => x
-            .tagAs('tr')
-            .tagAs('tbody', {id: id})
-            .tagAs('table', {class: 'fights'})
-          )
+          .map(x => x.tagAs('tbody').tagAs('table', {class: 'fights'}))
           .join("")
           .ifEmpty(say('nevidím žádné souboje').tagAs('p').tagAs('center'))
           .concat('<br>' + say('může se stát, že souboj s (2x2) jednotkou nezaznamenám'))
           ;
 
-          const update = () => fs.forEach( ([id, ab]) => {
-            var row = document.createElement('tr');
-            row.class = 'fight_stats';
-            row.innerHTML = ab
-              .map( x => ""
-                .tagAs('div', {style: ''})
-                .tagAs('td', {id: id + '_' + x.id, colspan: 2})
-              )
-              .join('')
+          [...document.querySelectorAll('.graph')].forEach( el => {
+            let parent = (i, ell) => i == 0 ? ell : parent(i-1, ell.parentNode);
+            let rightClasses = ({className: x}) => x.split(' ').filter(v => 1+['h', 'h_max'].indexOf(v));
+            el.onmouseover = ({target: t}) =>
+              t && rightClasses(t).length
+              ? parent(5, t).querySelector('.health_display').innerHTML =
+                  t.title + "".tagAs('img',  {src:'i/s/hea.gif', width: 14})
+              : false
               ;
-            document.querySelector('#'+id).appendChild(row);
-            ab.forEach( x => pan.tabs.fights.healthTracker(x.id, ([h, h_max]) =>
-                row.querySelector('#' + id + '_' + x.id).innerText = h + '/' + h_max
-              )
-            );
+            el.onmouseout = ({target: t}) =>
+              t && rightClasses(t).length
+              ? parent(5, t).querySelector('.health_display').innerText = ""
+              : false
+              ;
           });
 
-          update();
-          setInterval(update, 60*1000);
+          const kSCALE = 5;
+          const update = () => fs.forEach( ab => {
+            ab.forEach( x =>
+              pan.tabs.fights.healthTracker(x.id, args => {
+                let [h, hMax] = args.map( x => x < 0 ? 0 : x)
+                let fightings = [...document.querySelectorAll('.fighting_' + x.id)];
+                let title = h + ' z ' + hMax;
+                fightings.forEach( y => y.innerHTML = h
+                  .toString()
+                  .tagAs('div', {
+                    class: `h ${h > 0 ? "" : ' death'}`,
+                    style: `height:${h > 0 ? h/kSCALE : y.clientHeight-2}px`,
+                    title: title
+                  })
+                  .tagAs('div', {
+                    class: `h_max ${hMax > 0 ? "" : ' death'}`,
+                    style: `height:${hMax/kSCALE}px`,
+                    title: title
+                  })
+                  .concat(y.innerHTML)
+                );
+              })
+            )
+          });
+
+          // update();
+          serverTime().then( (prom) => {
+            let nextUpd = 60 - prom[5] + /*bias: */ 2;
+            setTimeout( () => {
+              update();
+              setInterval(update, 60*1000);
+            }, nextUpd);
+          });
       },
 
       parseAttribute: function(attr, html) {
@@ -459,6 +509,15 @@ var pan = {
       },
 
       healthTracker: function(unitID, callback) {
+        chrome.storage.sync.get('health', ({health: h}) => {
+          // h[unitID] = h[unitID] || [];
+          //
+          // if (h[unitID] == [] || h[unitID].back().time() < 0) {
+          //
+          // }
+
+        });
+
         const r = new XMLHttpRequest();
         r.open('POST', '/unit_info.aspx?id=u' + unitID);
         r.onload = e => {

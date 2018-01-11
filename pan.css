@@ -79,7 +79,7 @@ h1#heading {
   border-bottom-left-radius: 30px;
   text-shadow: -2px 2px #000;
   border-bottom: 1px solid #503c2f;
-  margin:-17px 5px 10px -5px;
+  margin:-17px 5px 10px 0;
 }
 h1#heading:hover {
   background-image: url('http://www.panhradu.cz/i/u/dem_cr_v_3_3f.gif');
@@ -201,6 +201,7 @@ h1#heading:hover {
   line-height: 1.5;
   /* padding: 0 0 0 10px; */
   margin: 0;
+  text-align: center;
 }
 
 
@@ -240,7 +241,9 @@ h1#heading:hover {
 .content table.amounts td.amount {
 }
 
-.content table.fights, .content table.fights td {
+.content table.fights,
+.content table.fights td,
+.content table.fights th {
   margin: 0;
   padding: 0;
   table-layout: fixed;
@@ -248,44 +251,64 @@ h1#heading:hover {
 .content table.fights {
   border-spacing: 0;
   width: 180px;
-  padding-bottom:1px;
+  padding-bottom:15px;
+  position: relative;
 }
 .content table.fights tr {
   padding: 2px 0;
 }
-.content table.fights td {
+.content table.fights td,
+.content table.fights th {
   vertical-align: middle;
 }
-.content table.fights td img {
+
+.content table .fight_stats {
+  /* margin-top: -1px; */
+}
+.content table.fights td {
+  border-top: 1px solid #cb432a;
+  background: #2c251c;
+}
+.content table.fights td:first-child {
+  border-top-left-radius: 12px;
+}
+.content table.fights td:last-child {
+  border-top-right-radius: 12px;
+}
+.content table.fights th img {
   width: 32px;
 }
-.content table.fights td:nth-child(2),
-.content table.fights td:nth-last-child(2) {
+.content table.fights th:nth-last-child(2) img {
+  margin-left: -4px;
+}
+.content table.fights th:nth-child(2),
+.content table.fights th:nth-last-child(2) {
   background: url('/i/t/bg_grass.gif');
   border-bottom: 1px solid #cb432a;
-  width:32px;
+  width:28px;
   /* Note: overflow of right aligned text */
   /* border-top: 1px solid #221718; */
 }
-.content table.fights td:nth-child(2) {
+.content table.fights th:nth-child(2) {
   padding:1px 0 2px 1px;
   border-top-left-radius: 12px;
   border-bottom-left-radius: 12px;
-  width: 24px;
+  width: 28px;
 }
-.content table.fights td:nth-last-child(2) {
+.content table.fights th:nth-last-child(2) {
   padding:1px 2px 1px 0;
   border-top-right-radius: 12px;
   border-bottom-right-radius: 12px;
 }
-.content table.fights td:first-child {
+
+.content table.fights th:first-child {
   padding-right: 4px;
   text-align: right;
 }
-.content table.fights td:last-child {
+.content table.fights th:last-child {
   padding-left: 4px;
 }
-.content table.fights td div {
+.content table.fights th div {
   display: inline-block;
   line-height: 1.25em;
   max-height: 39px;
@@ -293,6 +316,123 @@ h1#heading:hover {
   overflow: hidden;
   font-size: 11px;
   font-weight: 100;
+}
+
+.content table.fights td .graph,
+.content table.fights td {
+  overflow: auto;
+  /* height: 150px; */
+  width: auto;
+  vertical-align: bottom;
+}
+
+
+.content table.fights td .graph {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  flex: auto;
+}
+.content table.fights td .graph * {
+  cursor: crosshair !important;
+}
+.content table.fights td:first-child .graph {
+  flex-direction: row-reverse;
+  border-right: 1px solid black;
+  border-top-right-radius: 6px;
+}
+.content table.fights td:last-child .graph {
+  border-top-left-radius: 6px;
+  flex-direction: row;
+  border-left: 1px solid black;
+}
+
+.content table.fights td .h_max.death {
+  /* height: 10000px !important; */
+  background: #3f7fac;
+  color: #221718;
+}
+
+.content table.fights td .h_max {
+  color: #cb432aff; /*transparent*/
+  display: flex;
+  align-items: flex-end;
+  padding: 0;
+  width:8px;
+  overflow: hidden;
+  border-top: 1px solid black;
+  background: #221718;
+}
+
+.content table.fights td .h_max:first-child {
+  min-width: 8px;
+  font-weight: bold;
+}
+.content table.fights td .h_max:nth-child(2) {
+  min-width: 8px;
+}
+.content table.fights td .h_max:nth-child(3) {
+  min-width: 8px;
+}
+.content table.fights td .h_max:nth-child(4) {
+  min-width: 8px;
+}
+.content table.fights td .h_max:nth-child(5) {
+}
+
+.content table.fights td .h {
+  border-top: 1px solid black;
+  /* padding: 0 0 1px 0; */
+  /* margin-top: 75px; */
+  /* height: 75px; */
+  background: #cb432a70;
+  font-size: 10px;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  /* width:8px; */
+  overflow: hidden;
+  text-align: center;
+  vertical-align: bottom;
+}
+.content table.fights td .h_max:first-child .h {
+  color: #221718;
+  background: -webkit-linear-gradient(0, #ac3a24, #cb432a);
+}
+.content table.fights td:last-child .h_max:first-child .h {
+  background: -webkit-linear-gradient(0, #cb432a, #ac3a24);
+}
+.content table.fights td .h_max:nth-child(2) .h {
+  color: #231719;
+  background: #cb432ad0;
+}
+.content table.fights td .h_max:nth-child(3) .h {
+  color: #231719a1;
+  background: #cb432ab8;
+}
+.content table.fights td .h_max:nth-child(4) .h {
+  color: #23171957;
+  background: #cb432aa0;
+}
+.content table.fights td .h_max:nth-child(5) .h {
+  color: #23171922;
+  background: #cb432a88;
+}
+
+.content table.fights td .h.death {
+  /* display: none; */
+  background: #3f7fac;
+  content: "DEAD";
+}
+
+.content table.fights .health_display {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  padding-top: 10px;
+  text-shadow: -1px 2px #000;
+  color: #6f7630;
+  /* line-height: 29px; */
+  vertical-align: top;
 }
 
 .content .iframe_wrap {
@@ -308,7 +448,7 @@ h1#heading:hover {
 }
 
 #summary_content > div {
-  padding: 18px 5px  5px 5px;
+  padding: 10px 5px  5px 5px;
   border-top: 1px solid #503c2f;
   border-top-right-radius: 18px;
   border-top-left-radius: 18px;
