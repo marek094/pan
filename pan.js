@@ -183,6 +183,7 @@ var pan = {
     pan.sections().forEach( section => {
       section.content = document.getElementById(section.name + '_content');
       section.header = document.getElementById(section.name + '_header');
+      section.isInit = false;
       // section.self = section;
     });
   },
@@ -212,7 +213,7 @@ var pan = {
         ['content', 'header'].forEach(part => {
           const el = document.getElementById(section + '_' + part);
           if (!el) return;
-          el.style.display = (who.indexOf(section) > -1 ? 'block' : 'none');
+          el.style.display = (who.indexOf(section)+1 ? 'block' : 'none');
         });
       });
 
@@ -465,12 +466,12 @@ var pan = {
                   .toString()
                   .tagAs('div', {
                     class: `h ${h > 0 ? "" : ' death'}`,
-                    style: `height:${h > 0 ? h/kSCALE : y.clientHeight-2}px`,
+                    style: `height:${h/kSCALE}px`,
                     title: title
                   })
                   .tagAs('div', {
                     class: `h_max ${hMax > 0 ? "" : ' death'}`,
-                    style: `height:${hMax/kSCALE}px`,
+                    style: `height:${h > 0 ? hMax/kSCALE : y.clientHeight-2}px`,
                     title: title
                   })
                   .concat(y.innerHTML)
