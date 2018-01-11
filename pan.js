@@ -486,7 +486,10 @@ var pan = {
           update();
           serverTime().then( (prom) => {
             let nextUpd = 60 - prom[5] + /*bias: */ 2;
-            setTimeout( ()=>setInterval(update, 60*1000), nextUpd);
+            setTimeout( ()=> {
+              update();
+              setInterval(update, 60*1000);
+            }, nextUpd*1000);
           });
       },
 
