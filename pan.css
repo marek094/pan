@@ -339,10 +339,10 @@ h1#heading:hover {
 .content table.fights td:first-child .graph {
   flex-direction: row-reverse;
   border-right: 1px solid black;
-  border-top-right-radius: 6px;
+  /* border-top-right-radius: 6px; */
 }
 .content table.fights td:last-child .graph {
-  border-top-left-radius: 6px;
+  /* border-top-left-radius: 6px; */
   flex-direction: row;
   border-left: 1px solid black;
 }
