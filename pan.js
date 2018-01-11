@@ -209,11 +209,14 @@ var pan = {
       // alert(target);
       // console.log(target);
       const who = (target.className || " " ).split(/\s+/);
-      pan.sections().forEach( ({name: section}) => {
+      pan.sections().forEach( section => {
         ['content', 'header'].forEach(part => {
-          const el = document.getElementById(section + '_' + part);
-          if (!el) return;
-          el.style.display = (who.indexOf(section)+1 ? 'block' : 'none');
+          if (1 + who.indexOf(section.name) && !section.isInit) {
+            section.isInit = true;
+            section.init();
+          }
+          const el = document.getElementById(section.name + '_' + part);
+          el && (el.style.display = 1+who.indexOf(section.name) ? 'block' : 'none');
         });
       });
 
@@ -721,7 +724,7 @@ var main = function(e) {
     chrome.storage.sync.get('selectedSection', ({selectedSection: x}) =>
       menu.handler(document.querySelector('#menu .' + x))
     );
-    sections().forEach( ({init: f}) => f());
+    // sections().forEach( ({init: f}) => f());
 
     const handle = document.getElementById('handle');
     handle.onclick = function(e) {
