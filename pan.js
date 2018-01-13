@@ -9,8 +9,14 @@ Array.prototype.groupBy = function (selector) { return this
   ;
 }
 
-Array.prototype.back = function () { return this[this.length-1] }
-Array.prototype.front = function () { return this[0] }
+Array.prototype.back = function (val) {
+  if (val !== undefined) this[this.length-1] = val;
+  return this[this.length-1];
+}
+Array.prototype.front = function (val) {
+  if (val !== undefined) this[0] = val;
+  return this[0];
+}
 
 Array.prototype.flat = function () { return this
   .reduce((xs, x) => xs.concat(x), [])
@@ -43,6 +49,19 @@ String.prototype.tagAs = function (tag, args) { // k=='style' ? v : v
   }
   return res;
 }
+
+// chrome.storage.onChanged.addListener(function(c){
+//   console.log(c);
+// });
+
+const storage = {
+  set: function(args) {
+    return new Promise((resolve) => chrome.storage.set(args, resolve));
+  },
+  get: function(args) {
+    return new Promise((resolve) => chrome.storage.get(args, resolve));
+  }
+};
 
 var tagAs = function (tag) {
   return function (x) {
@@ -99,6 +118,7 @@ var serverTime = () => new Promise((resolve, reject) => {
 var kHIDDEN = "-200px";
 var kDISPLAYED = "0px";
 var kHOVERED = "-190px";
+var kHEALTH_WAITING = -1;
 
 var injectExec = function(codeLambda) {
   var script = document.createElement('script');
@@ -205,14 +225,19 @@ var pan = {
         ;
     },
 
-    handler: function (target) {
+    handler: function (target, {dblclick: reload, isInitial: notRefresh} = {}) {
       // alert(target);
       // console.log(target);
-      const who = (target.className || " " ).split(/\s+/);
+      const who = ((target && target.className) || " ").split(/\s+/);
       pan.sections().forEach( section => {
-        if (1 + who.indexOf(section.name) && !section.isInit) {
-          section.isInit = true;
-          section.init();
+        if (1 + who.indexOf(section.name)) {
+          if (!section.isInit || reload) {
+            section.isInit = true;
+            section.init();
+          }
+          if (section.refresh && !notRefresh) {
+            section.refresh();
+          }
         }
         ['content', 'header'].forEach(part => {
           const el = document.getElementById(section.name + '_' + part);
@@ -358,12 +383,12 @@ var pan = {
     fights: {
       title: 'Boje',
       name: 'fights',
-      init: function () {
-        // alert(Object.keys(pan.tabs.fights));
-        const fs = Array.from(document.querySelectorAll('.unit'))
+
+      parseFights: function(els) {
+        return Array.from(els)
           .reduce( ([m, ps], u) => {
             const {src:src, title:title, id:id, clientWidth:width} = u.querySelector('img.UI');
-            const match = src.match(/(\w+(\d)_\d)f\.gif$/);
+            const match = src.match(/(\w+(\d)_\d)fs?\.gif$/);
             if (!match) return [m, ps];
             const [,img, d] = match;
             const coor = [u.style.left, u.style.top].map( x => Math.round(parseInt(x) / 64));
@@ -382,65 +407,95 @@ var pan = {
           .pop()
           .map( x => //[ 'fight_' + x[0].id + '_' + x[1].id
             //,
-            x.sort( ({id: x}, {id: y}) => x-y)
+            x.sort( ({id: x}, {id: y}) => x - y)
             //]
           )
           ;
+      },
 
-        // console.log(fs);
-
-        pan.tabs.fights.content.innerHTML = fs
+      renderFights: function(fs) {
+        return fs
           .map( ab => ab
-              // TODO sort by owner
-              .map( (u, i) =>
-                [ u.name
-                    .replace(/\([^\)]*\)/g, "")
-                    .split('-')
-                    .map( x => x.trim())
-                    .map( (x, i) => i==0 ? x : x.tagAs('i').tagAs('a', {href: '#'}) )
-                    .reverse()
-                    .join('<br>')
-                    // .replace(/^(.*)-?(.*)$/, (_,j,a) =>  + '<br>' + j.trim())
-                    // .replace(/\s+/g, '&nbsp;')
-                    // .replace(/&nbsp;/, ' ')
-                    .tagAs('div')
-                , ""
-                    .tagAs('img', {
-                      title: u.name,
-                      src: '/i/u/'
-                            + [...u.img.split('_').slice(0,-2), (2*i+2), 3].join('_')
-                            + 'f.gif'
-                    })
-                ]
-              )
-              .map( (xs, i) => i==0 ? xs : xs.reverse())
-              .flat()
-              .map(tagAs('th'))
-              .join("")
-              .tagAs('tr')
+            // TODO sort by owner
+            .map( (u, i) =>
+              [ u.name
+                  .replace(/\([^\)]*\)/g, "")
+                  .split('-')
+                  .map( x => x.trim())
+                  .map( (x, i) => i==0 ? x : x.tagAs('i').tagAs('a', {href: '#'}) )
+                  .reverse()
+                  .join('<br>')
+                  // .replace(/^(.*)-?(.*)$/, (_,j,a) =>  + '<br>' + j.trim())
+                  // .replace(/\s+/g, '&nbsp;')
+                  // .replace(/&nbsp;/, ' ')
+                  .tagAs('div')
+              , ""
+                  .tagAs('img', {
+                    title: u.name,
+                    src: '/i/u/'
+                          + [...u.img.split('_').slice(0,-2), (2*i+2), 3].join('_')
+                          + 'f.gif'
+                  })
+              ]
+            )
+            .map( (xs, i) => i==0 ? xs : xs.reverse())
+            .flat()
+            .map(tagAs('th'))
+            .join("")
+            .tagAs('tr')
+            .concat( ""
+              .concat("".tagAs('td'))
               .concat( ""
-                .tagAs('div', {class: 'health_display'})
+                .tagAs('div', {
+                  class: 'health_display'
+                })
                 .tagAs('td', {
-                  colspan: 4,
+                  colspan: 2,
                   style: 'border: 0'
                 })
-                .tagAs('tr')
               )
-              .concat( ab
-                .map(({id: id}) => ""
-                  .tagAs('div', {class: ['graph', 'fighting_'+id].join(' ')})
-                  .tagAs('td', {colspan: 2})
-                )
-                .join("")
-                .tagAs('tr')
+              .concat("".tagAs('td'))
+              .tagAs('tr', {
+                id: pan.tabs.fights.fightId( ab.map(({id: id}) => id) ),
+                class: 'display_row'
+              })
+            )
+            .concat( ab
+              .map(({id: id}) => ""
+                .tagAs('div', {class: ['graph', 'fighting_'+id].join(' ')})
+                .tagAs('td', {colspan: 2})
               )
-
+              .join("")
+              .tagAs('tr')
+            )
           )
-          .map(x => x.tagAs('tbody').tagAs('table', {class: 'fights'}))
+          .map( x => x
+            .tagAs('tbody')
+            .tagAs('table', {
+              class: 'fights'
+            })
+          )
           .join("")
           .ifEmpty(say('nevidím žádné souboje').tagAs('p').tagAs('center'))
           .concat('<br>' + say('může se stát, že souboj s (2x2) jednotkou nezaznamenám'))
           ;
+      },
+
+      init: function () {
+
+        // alert(Object.keys(pan.tabs.fights));
+        const fs = pan.tabs.fights.parseFights(document.querySelectorAll('.unit'));
+
+        chrome.storage.sync.get('persistentFights', o => {
+          o.persistentFights = o.persistentFights || [];
+          chrome.storage.sync.set(o);
+          // console.log(o.persistentFights);
+          const filterdFs = fs.filter( ([{id:aID}, {id: bID}]) =>
+            undefined === o.persistentFights.find(pan.tabs.fights.fightFinder(aID, bID))
+          );
+
+          const allFs = [...o.persistentFights,...filterdFs];
+          pan.tabs.fights.content.innerHTML = pan.tabs.fights.renderFights(allFs);
 
           [...document.querySelectorAll('.graph')].forEach( el => {
             let parent = (i, ell) => i == 0 ? ell : parent(i-1, ell.parentNode);
@@ -448,7 +503,7 @@ var pan = {
             el.onmouseover = ({target: t}) =>
               t && rightClasses(t).length
               ? parent(5, t).querySelector('.health_display').innerHTML =
-                  t.title + "".tagAs('img',  {src:'i/s/hea.gif', width: 14})
+                  t.dataset.value + "".tagAs('img',  {src:'i/s/hea.gif', width: 14})
               : false
               ;
             el.onmouseout = ({target: t}) =>
@@ -458,39 +513,112 @@ var pan = {
               ;
           });
 
-          const kSCALE = 5;
-          const update = () => fs.forEach( ab => {
-            ab.forEach( x =>
-              pan.tabs.fights.healthTracker(x.id, args => {
-                let [h, hMax] = args.map( x => x < 0 ? 0 : x)
-                let fightings = [...document.querySelectorAll('.fighting_' + x.id)];
-                let title = h + ' z ' + hMax;
-                fightings.forEach( y => y.innerHTML = h
-                  .toString()
-                  .tagAs('div', {
-                    class: `h ${h > 0 ? "" : ' death'}`,
-                    style: `height:${h/kSCALE}px`,
-                    title: title
-                  })
-                  .tagAs('div', {
-                    class: `h_max ${hMax > 0 ? "" : ' death'}`,
-                    style: `height:${h > 0 ? hMax/kSCALE : y.clientHeight-2}px`,
-                    title: title
-                  })
-                  .concat(y.innerHTML)
-                );
-              })
-            );
-          });
+          serverTime().then( prom => {
+            const serverTime = (prom[2]*24 + prom[3])*60 + prom[4];
 
-          update();
-          serverTime().then( (prom) => {
-            let nextUpd = 60 - prom[5] + /*bias: */ 2;
-            setTimeout( ()=> {
-              update();
-              setInterval(update, 60*1000);
-            }, nextUpd*1000);
-          });
+            chrome.storage.sync.get(null, o => {
+              o.fights = o.fights || [];
+              console.log(o);
+              allFs.forEach( ab => {
+                const ids = ab.map(({id: x}) => x);
+                const fightID = pan.tabs.fights.fightId(ids);
+                const saved = o.fights.find(({id: x}) => x == fightID);
+                if (saved === undefined) {
+                  o.fights.push({startTime: serverTime, id: fightID});
+                  chrome.storage.sync.set(o);
+                } else {
+                  ids.forEach( id => {
+                    // alert(o.health[id]);
+                    if (!o['health_'+id]) return;
+                    o['health_'+id].filter(({time: t}) => saved.startTime <= t).forEach( h => {
+                      // console.log(id, v);
+                      pan.tabs.fights.updateGraphsWith(id, h.value, h.time);
+                    });
+                  });
+                }
+              });
+              // if (o.fights.find({}))
+            })
+
+            const update = function(time, timeOut = 60) { allFs.forEach( ab => {
+              let isDead = false;
+              ab.forEach( x =>
+                pan.tabs.fights.healthTracker(x.id, time, y => {
+                  pan.tabs.fights.updateGraphsWith(x.id, y)
+                  if (y.hMax == 0) isDead = true;
+                })
+              );
+              if (isDead) return;
+              setTimeout(() => update(time+1), timeOut*1000);
+            })};
+
+            const nextUpd = 60 - prom[5] + /*bias: */ 4;
+            update(serverTime, nextUpd);
+          }); // serverTime (time)
+
+          // console.log([...pan.tabs.fights.content.querySelectorAll('*')]);
+          // make fight persistent
+          [...pan.tabs.fights.content.querySelectorAll('table')].forEach( el => {
+            const {id: strFightID} = el.querySelector('.display_row');
+            const fightID = parseInt(strFightID);
+            const unitIDs = strFightID.split('_').slice(1).map(x=>parseInt(x));
+            const fightFinder = pan.tabs.fights.fightFinder(unitIDs[0], unitIDs[1]);
+            if ({isPersistent: o.persistentFights.find(fightFinder)}.isPersistent) {
+              el.className += ' persistent';
+            }
+            [...el.querySelectorAll('th')].splice(1,2).forEach( ell => ell.ondblclick = e => {
+              chrome.storage.sync.get('persistentFights', oo => {
+                if ({isPersistent: oo.persistentFights.find(fightFinder)}.isPersistent) {
+                  el.className = el.className.split(/\s+/).filter(x => x!='persistent').join(' ');
+                  oo.persistentFights = oo.persistentFights.filter(x=>!fightFinder(x));
+                } else {
+                  el.className += ' persistent';
+                  const value = allFs.find(fightFinder);
+                  if (!value) {
+                    alert(value);
+                    console.log(fs);
+                    console.log(strFightID);
+                  }
+                  oo.persistentFights.push(value);
+                }
+                chrome.storage.sync.set(oo);
+              })
+            }); // ell.ondblclick, forEach (ell)
+          }); // forEach (el)
+        }); // chrome.storage.sync.get('persistentFights')
+      },
+
+      fightId: function ([unitID1, unitID2]) {
+          [unitID1, unitID2] = [unitID1, unitID2].sort((x,y) => y - x);
+          return `fight_${unitID1}_${unitID2}`;
+      },
+
+      fightFinder: (a,b) => ([{id: aID}, {id: bID}]) => a==aID && b==bID || b==aID && a==bID,
+
+      updateGraphsWith: function (id, [h, hMax], time) {
+        const kSCALE = 5;
+        // let  = args.map( x => x < 0 ? 0 : x)
+        let fightings = [...document.querySelectorAll('.fighting_' + id)];
+        // console.log(fightings);
+        let title = `${h} z ${hMax}`;
+        let dayT = Math.floor(time%(24*60));
+        let label = (time ? `${Math.floor(dayT/60)}:${dayT%60} -` : "") + title;
+        fightings.forEach( y => y.innerHTML = h
+          .toString()
+          .tagAs('div', {
+            class: `h ${h > 0 ? "" : ' death'}`,
+            style: `height:${h/kSCALE}px`,
+            title: label,
+            'data-value': title
+          })
+          .tagAs('div', {
+            class: `h_max ${hMax > 0 ? "" : ' death'}`,
+            style: `height:${h > 0 ? hMax/kSCALE : y.clientHeight-1}px`,
+            title: label,
+            'data-value': title
+          })
+          .concat(y.innerHTML)
+        );
       },
 
       parseAttribute: function(attr, html) {
@@ -505,30 +633,31 @@ var pan = {
           .shift()
           ;
         // console.log(m);
-        if (!m || !m[1]) return [-1,-1];
+        if (!m || !m[1]) return [0, 0];
         const hlth = m[1].split(' z ');
         return [ parseInt( hlth[0] )
                ,  eval( hlth[1].replace(/\<[^\>]+\>/g, "") )
                ];
       },
 
-      healthTracker: function(unitID, callback) {
-        chrome.storage.sync.get('health', ({health: h}) => {
-          // h[unitID] = h[unitID] || [];
-          //
-          // if (h[unitID] == [] || h[unitID].back().time() < 0) {
-          //
-          // }
-
+      healthTracker: function(unitID, time, callback) {
+        chrome.storage.sync.get([`health_${unitID}`], ({[`health_${unitID}`]: h}) => {
+          h = h || [];
+          if (h.length > 0 && h.back().time >= time ) {
+            return;
+          }
+          h.push({time: time});
+          chrome.storage.sync.set({[`health_${unitID}`]: h});
+          const r = new XMLHttpRequest();
+          r.open('POST', '/unit_info.aspx?id=u' + unitID);
+          r.onload = e => {
+            const html = eval(r.responseText).filter(({attr:x})=>x=='html').map(({val:x})=>x).shift();
+            const value = pan.tabs.fights.parseAttribute('Zdraví', html);
+            h.back({time: time, value: value});
+            chrome.storage.sync.set({[`health_${unitID}`]: h}, () => callback(value));
+          }
+          r.send();
         });
-
-        const r = new XMLHttpRequest();
-        r.open('POST', '/unit_info.aspx?id=u' + unitID);
-        r.onload = e => {
-          const html = eval(r.responseText).filter(({attr:x})=>x=='html').map(({val:x})=>x).shift();
-          callback(pan.tabs.fights.parseAttribute('Zdraví', html));
-        }
-        r.send();
       }
 
 
@@ -613,6 +742,12 @@ var pan = {
 
       title: 'Pošta',
       name: 'post',
+      refresh: function() {
+        injectExec(() => {
+          $('#tl_posta_pocet').text("");
+          $('#img_posta_obalka').show();
+        });
+      },
       init: function() {
 
         pan.tabs.post.content.innerHTML = ""
@@ -630,6 +765,8 @@ var pan = {
         const iframe = pan.tabs.post.content.querySelector('#posta_frame');
         // alert(pan.tabs.post.content.innerHTML);
         iframe.onload = function (e) {
+          // Note: remove notification from 'Forum' main link
+
           let frameDoc = iframe.contentDocument;
           let submit = frameDoc.getElementById('odeslat');
           let input = frameDoc.getElementById('edit_player_name');
@@ -691,25 +828,40 @@ var pan = {
       title: 'Verze rozšíření',
       name: 'version',
       init: function () {
-        pan.tabs.version.content.innerHTML = `
-            <p align="center">
-            Tento Správce je rozšíření pro Google Chrome
-            a slouží pouze jako neoficiální uživatelká podpora ke hře.
-            Bylo vytvořeno na začátku roku 2018
-            <a href="http://marekcerny.com" target="_blank">Markem</a>.
-            </p>
-            <h4>GitHub</h4>
-            <p>Projekt sídlí a je ke stažení na
-              <a href="https://github.com/marek094/pan">GitHub.com</a>
-            </p>
-            <h4>Užitečné odkazy</h4>
-            <ul>
-              <li><a href="/help/rady_veterana.htm" target="_blank">
-                  Veteránova nápoveda</a></li>
-            </ul>
-        `;
-      }
+        with (pan.tabs.version) {
+          content.innerHTML = `
+              <p align="center">
+              Tento Správce je rozšíření pro Google Chrome
+              a slouží pouze jako neoficiální uživatelká podpora ke hře.
+              Bylo vytvořeno na začátku roku 2018
+              <a href="http://marekcerny.com" target="_blank">Markem</a>.
+              </p>
+              <h4>GitHub</h4>
+              <p>Projekt sídlí a je ke stažení na
+                <a href="https://github.com/marek094/pan">GitHub.com</a>
+              </p>
+              <h4>Nápověda</h4>
+              <p>Tip: Dvojklikem na odkaz v&nbsp;menu se celá sekce načte znovu.
+              </p>
+              <p>Tip: Dvojklikem na bojující dvojici v&nbsp;sekci 'Boje' se souboj trvale připne.
+              </p>
+              <h4>Užitečné odkazy</h4>
+              <ul>
+                <li><a href="/help/rady_veterana.htm" target="_blank">
+                    Veteránova nápoveda</a></li>
+              </ul>
+              <h3>Nastavení</h3>
+              <p id="clear_data_notif"></p>
+              <p>
+                <label for="clear_data">Smaž uložená data: </label><button id="clear_data">reset</button>
+              </p>
+          `;
 
+          content.querySelector('#clear_data').onclick = e => chrome.storage.sync.clear(() =>
+            content.querySelector('#clear_data_notif').innerText = 'Uložená data byla vymazána'
+          );
+        }
+      }
     }
 
   }
@@ -722,7 +874,10 @@ var main = function(e) {
     init();
     menu.load();
     chrome.storage.sync.get('selectedSection', ({selectedSection: x}) =>
-      menu.handler(document.querySelector('#menu .' + x))
+      menu.handler(
+        document.querySelector(`#menu .${x}`) || document.querySelector('#menu a:first-child'),
+        {isInitial: true}
+      )
     );
     // sections().forEach( ({init: f}) => f());
 
@@ -753,6 +908,11 @@ var main = function(e) {
         div.style.right = kHIDDEN;
       }
     };
+
+    [...document.querySelectorAll('#handle a')].forEach( el =>
+      el.ondblclick = ({target: ell}) => menu.handler(ell, {dblclick: true})
+    );
+
   }
 };
 

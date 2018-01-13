@@ -22,7 +22,14 @@ ul, li {
   margin: 0;
   list-style-type: square;
 }
-ul {padding-left: 14px;}
+ul {padding-left: 18px;}
+
+h1, h2, h3,
+h4, h5, h6 {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
 .content {
   vertical-align: top;
   color: #dcaf67;
@@ -285,18 +292,24 @@ h1#heading:hover {
 .content table.fights th:nth-last-child(2) {
   background: url('/i/t/bg_grass.gif');
   border-bottom: 1px solid #cb432a;
+  border-top: 3px double #00000000;
   width:28px;
   /* Note: overflow of right aligned text */
   /* border-top: 1px solid #221718; */
 }
+.content table.fights.persistent th:nth-child(2),
+.content table.fights.persistent th:nth-last-child(2) {
+  /* border-top-color: #3f7fac; */
+  border-top-color: #00d9ff;
+}
 .content table.fights th:nth-child(2) {
-  padding:1px 0 2px 1px;
+  padding:3px 0 2px 1px;
   border-top-left-radius: 12px;
   border-bottom-left-radius: 12px;
   width: 28px;
 }
 .content table.fights th:nth-last-child(2) {
-  padding:1px 2px 1px 0;
+  padding:3px 2px 1px 0;
   border-top-right-radius: 12px;
   border-bottom-right-radius: 12px;
 }
@@ -379,13 +392,20 @@ h1#heading:hover {
 }
 .content table.fights td .h_max:nth-child(5) {
 }
+.content table.fights td .h_max:last-child {
+  min-width: 8px;
+}
 
 .content table.fights td .h {
   border-top: 1px solid black;
   /* padding: 0 0 1px 0; */
   /* margin-top: 75px; */
   /* height: 75px; */
-  background: #cb432a70;
+  /* background: #cb432a70; */
+  /* color: #cb432aff; */
+  /* color: #cb432a70; */
+  background: #6c271b;
+  color: #6c271b;
   font-size: 10px;
   writing-mode: vertical-rl;
   text-orientation: upright;
@@ -393,6 +413,7 @@ h1#heading:hover {
   overflow: hidden;
   text-align: center;
   vertical-align: bottom;
+  padding-bottom: 1px;
 }
 .content table.fights td .h_max:first-child .h {
   color: #221718;
@@ -417,11 +438,19 @@ h1#heading:hover {
   color: #23171922;
   background: #cb432a88;
 }
+.content table.fights td .h_max:last-child .h {
+  color: #221718;
+  font-weight: bold;
+}
 
 .content table.fights td .h.death {
   /* display: none; */
   background: #3f7fac;
   content: "DEAD";
+}
+
+.content table.fights .display_row td {
+  border: 0;
 }
 
 .content table.fights .health_display {
@@ -434,6 +463,7 @@ h1#heading:hover {
   /* line-height: 29px; */
   vertical-align: top;
   font-weight: bold;
+  left:0;
 }
 
 .content .iframe_wrap {
