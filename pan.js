@@ -405,11 +405,7 @@ var pan = {
             return [m, ps];
           }, [{}, []])
           .pop()
-          .map( x => //[ 'fight_' + x[0].id + '_' + x[1].id
-            //,
-            x.sort( ({id: x}, {id: y}) => x - y)
-            //]
-          )
+          .map( x => x.sort( ({id: x}, {id: y}) => x - y))
           ;
       },
 
@@ -481,9 +477,55 @@ var pan = {
           ;
       },
 
-      init: function () {
+      initAllFights: function(allFs, time) {
+        chrome.storage.sync.get(null, oo => {
+          oo.fights = oo.fights || [];
+          allFs.forEach( ab => {
+            const ids = ab.map(({id: x}) => x);
+            const fightID = pan.tabs.fights.fightId(ids);
+            const saved = oo.fights.find(({id: x}) => x == fightID);
+            if (saved === undefined) {
+              oo.fights.push({startTime: time, id: fightID});
+              chrome.storage.sync.set(oo);
+            } else {
+              ids.forEach( id => {
+                // alert(o.health[id]);
+                if (!oo['health_'+id]) return;
+                oo['health_'+id].filter(({time: t}) => saved.startTime <= t).forEach( h => {
+                  // console.log(id, v);
+                  pan.tabs.fights.updateGraphsWith(id, h.value, h.time);
+                });
+              });
+            }
+          }); // forEach (ab)
+        }); // chrome.storage.sync.get(null, oo)
+      },
 
-        // alert(Object.keys(pan.tabs.fights));
+      timeoutID: null,
+
+      updateAllFights: function(allFs, time, timeOut = 60) {
+        allFs
+          .forEach( ab => {
+            let isDead = false;
+            ab.forEach( x =>
+              pan.tabs.fights.healthTracker(x.id, time, y => {
+                pan.tabs.fights.updateGraphsWith(x.id, y)
+                if (y.hMax == 0) isDead = true;
+              })
+            );
+            if (isDead) return;
+            pan.tabs.fights.timeoutID = setTimeout(() =>
+              pan.tabs.fights.updateAllFights(allFs, time+1),
+              timeOut*1000);
+          })
+          ;
+      },
+
+      init: function () {
+        if (pan.tabs.fights.timeoutID) {
+          clearTimeout(pan.tabs.fights.timeoutID);
+          pan.tabs.fights.timeoutID = null;
+        }
         const fs = pan.tabs.fights.parseFights(document.querySelectorAll('.unit'));
 
         chrome.storage.sync.get('persistentFights', o => {
@@ -497,67 +539,14 @@ var pan = {
           const allFs = [...o.persistentFights,...filterdFs];
           pan.tabs.fights.content.innerHTML = pan.tabs.fights.renderFights(allFs);
 
-          [...document.querySelectorAll('.graph')].forEach( el => {
-            let parent = (i, ell) => i == 0 ? ell : parent(i-1, ell.parentNode);
-            let rightClasses = ({className: x}) => x.split(' ').filter(v => 1+['h', 'h_max'].indexOf(v));
-            el.onmouseover = ({target: t}) =>
-              t && rightClasses(t).length
-              ? parent(5, t).querySelector('.health_display').innerHTML =
-                  t.dataset.value + "".tagAs('img',  {src:'i/s/hea.gif', width: 14})
-              : false
-              ;
-            el.onmouseout = ({target: t}) =>
-              t && rightClasses(t).length
-              ? parent(5, t).querySelector('.health_display').innerText = ""
-              : false
-              ;
-          });
-
           serverTime().then( prom => {
             const serverTime = (prom[2]*24 + prom[3])*60 + prom[4];
-
-            chrome.storage.sync.get(null, o => {
-              o.fights = o.fights || [];
-              console.log(o);
-              allFs.forEach( ab => {
-                const ids = ab.map(({id: x}) => x);
-                const fightID = pan.tabs.fights.fightId(ids);
-                const saved = o.fights.find(({id: x}) => x == fightID);
-                if (saved === undefined) {
-                  o.fights.push({startTime: serverTime, id: fightID});
-                  chrome.storage.sync.set(o);
-                } else {
-                  ids.forEach( id => {
-                    // alert(o.health[id]);
-                    if (!o['health_'+id]) return;
-                    o['health_'+id].filter(({time: t}) => saved.startTime <= t).forEach( h => {
-                      // console.log(id, v);
-                      pan.tabs.fights.updateGraphsWith(id, h.value, h.time);
-                    });
-                  });
-                }
-              });
-              // if (o.fights.find({}))
-            })
-
-            const update = function(time, timeOut = 60) { allFs.forEach( ab => {
-              let isDead = false;
-              ab.forEach( x =>
-                pan.tabs.fights.healthTracker(x.id, time, y => {
-                  pan.tabs.fights.updateGraphsWith(x.id, y)
-                  if (y.hMax == 0) isDead = true;
-                })
-              );
-              if (isDead) return;
-              setTimeout(() => update(time+1), timeOut*1000);
-            })};
-
             const nextUpd = 60 - prom[5] + /*bias: */ 4;
-            update(serverTime, nextUpd);
+            pan.tabs.fights.initAllFights(allFs, serverTime);
+            pan.tabs.fights.updateAllFights(allFs, serverTime, nextUpd);
           }); // serverTime (time)
 
-          // console.log([...pan.tabs.fights.content.querySelectorAll('*')]);
-          // make fight persistent
+          // Register events for persistent fights
           [...pan.tabs.fights.content.querySelectorAll('table')].forEach( el => {
             const {id: strFightID} = el.querySelector('.display_row');
             const fightID = parseInt(strFightID);
@@ -584,6 +573,26 @@ var pan = {
                 chrome.storage.sync.set(oo);
               })
             }); // ell.ondblclick, forEach (ell)
+          }); // forEach (el)
+
+          // Register hover events
+          [...document.querySelectorAll('.graph')].forEach( el => {
+            let parent = (i, ell) => i == 0 ? ell : parent(i-1, ell.parentNode);
+            let rightClasses = ({className: x}) => x
+              .split(' ')
+              .filter(v => 1+['h', 'h_max'].indexOf(v))
+              ;
+            el.onmouseover = ({target: t}) =>
+            t && rightClasses(t).length
+            ? parent(5, t).querySelector('.health_display').innerHTML =
+            t.dataset.value + "".tagAs('img',  {src:'i/s/hea.gif', width: 14})
+            : false
+            ;
+            el.onmouseout = ({target: t}) =>
+            t && rightClasses(t).length
+            ? parent(5, t).querySelector('.health_display').innerText = ""
+            : false
+            ;
           }); // forEach (el)
         }); // chrome.storage.sync.get('persistentFights')
       },
