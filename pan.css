@@ -53,25 +53,13 @@ h4, h5, h6 {
   padding: 2px;
 }
 .content .units td:nth-child(2) {
-  /* background-image: url('http://www.panhradu.cz/i/t/bg_grass.gif'); */
   border-radius: 1000px;
-  /* height: 32px !important; */
-  /* width:  32px; */
   padding: 0;
   cursor: pointer;
 }
 .content .units td:nth-child(2) img {
-  /* width: 32px; */
-  /* position:relative; */
-  /* margin-top: -20px; */
-  /* margin-left: -5px; */
 }
-/* #content td:first-child img:last-child {
-  width: 50%;
-  position: relative;
-  margin-left: 10px;
-  margin-top: -20px;
-} */
+
 #table {
   color: #eacd86;
   font-size: 12px;
@@ -199,7 +187,7 @@ h1#heading:hover {
 }
 
 #content {
-  height: -webkit-calc(100% - 5px);
+  height: -webkit-calc(100% - 100px);
   position: absolute;
   width: 180px;
 }
@@ -471,7 +459,7 @@ h1#heading:hover {
 }
 .content .iframe_wrap iframe {
   width: 175px;
-  height: -webkit-calc(100% - 85px) !important;
+  height: -webkit-calc(100% - 90px) !important;
   border:0;
   position: absolute;
   overflow-y: scroll;
