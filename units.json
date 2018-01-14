@@ -44,6 +44,7 @@
   "orsz" :  "icm_60",
 
   "dv" : "icm_70",
+  "dbig":"icm_70",
   "dvz" : "icm_71",
   "dvc" : "icm_72",
   "dvr" : "icm_73",
@@ -101,7 +102,7 @@
   "obr_pa_s" : "icm_530",
 
   "obr_vo_v" : "icm_540",
-  "obr_pa_v" : "icm_550",  
+  "obr_pa_v" : "icm_550",
 
 
   "vao" : "icm_560",
