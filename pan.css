@@ -53,17 +53,18 @@ h4, h5, h6 {
   padding: 2px;
 }
 .content .units td:nth-child(2) {
-  background-image: url('http://www.panhradu.cz/i/t/bg_grass.gif');
+  /* background-image: url('http://www.panhradu.cz/i/t/bg_grass.gif'); */
   border-radius: 1000px;
-  height: 32px !important;
-  width:  32px;
+  /* height: 32px !important; */
+  /* width:  32px; */
+  padding: 0;
   cursor: pointer;
 }
 .content .units td:nth-child(2) img {
-  width: 32px;
-  position:relative;
-  margin-top: -20px;
-  margin-left: -5px;
+  /* width: 32px; */
+  /* position:relative; */
+  /* margin-top: -20px; */
+  /* margin-left: -5px; */
 }
 /* #content td:first-child img:last-child {
   width: 50%;

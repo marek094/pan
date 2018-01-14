@@ -18,7 +18,8 @@
   },
   "web_accessible_resources": [
     "posta.css",
-    "pan.html"
+    "pan.html",
+    "units.json"
   ],
   "permissions": [
     "storage"

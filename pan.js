@@ -320,8 +320,14 @@ var pan = {
 
           return res;
         },
-
         units: function() {
+          const unitsTable = (() => {
+            const r = new XMLHttpRequest();
+            r.open('GET', chrome.extension.getURL('/units.json'), {runAsync: false}.runAsync);
+            r.send();
+            return JSON.parse(r.responseText);
+          })();
+
           var cont = [...document.querySelectorAll('.unit')]
             .map(x => {
               var p = x.firstChild.title
@@ -337,8 +343,15 @@ var pan = {
             })
             .map(o => {
               const x = o.val;
-              const img = x.firstChild;
+              const img = x.firstChild.cloneNode({deepCopy: true}.deepCopy);
               img.dataset.id = o.val.id.slice(1);
+              img.src = (() => {
+                let m = img.src.match(/\/i\/u\/(\w+)_\d_\df?s?\.gif$/);
+                if (m && unitsTable[m[1]]) {
+                  return `/i/u/${unitsTable[m[1]]}.png`;
+                }
+                return img.src;
+              })();
               const erb = x.getElementsByClassName('F')[0].src;
               const f = ""
                 .tagAs('img', {

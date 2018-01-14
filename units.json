@@ -1,0 +1,177 @@
+{
+  "kn": "icm_1",
+  "kb": "icm_2",
+
+  "__comment" : "--- 3",
+
+  "zbb": "icm_4",
+  "zbp": "icm_5",
+  "zb": "icm_6",
+  "zbm": "icm_7",
+  "zbz": "icm_8",
+  "zbc": "icm_9",
+
+  "bk" : "icm_10",
+
+  "ar"  : "icm_12",
+  "arm" : "icm_13",
+  "arcz": "icm_14",
+
+  "bu" : "icm_15",
+  "lez": "icm_17",
+  "lec": "icm_18",
+  "le" : "icm_19",
+
+  "vo" : "icm_20",
+  "vop": "icm_20",
+  "se" : "icm_21",
+  "sec": "icm_22",
+
+
+  "bez": "icm_24",
+  "be" : "icm_25",
+  "bec": "icm_26",
+
+  "orsa" :  "icm_30",
+  "orsese": "icm_31",
+  "orsast": "icm_32",
+  "orsm" :  "icm_33",
+
+  "__comment" : "---",
+
+  "orv"  :  "icm_45",
+  "ors"  :  "icm_55",
+  "orsz" :  "icm_60",
+
+  "dv" : "icm_70",
+  "dvz" : "icm_71",
+  "dvc" : "icm_72",
+  "dvr" : "icm_73",
+  "dmr" : "icm_74",
+  "dm" : "icm_75",
+  "dmz" : "icm_76",
+  "dmc" : "icm_77",
+
+  "dws" : "icm_80",
+  "dwo" : "icm_81",
+  "dwb" : "icm_82",
+  "dwv" : "icm_83",
+  "dwr" : "icm_84",
+
+  "bo": "icm_100",
+  "boz": "icm_101",
+  "bop": "icm_102",
+
+  "drz" : "icm_110",
+  "drc" : "icm_111",
+  "drm" : "icm_112",
+  "drb" : "icm_113",
+  "drce": "icm_114",
+  "drzl" : "icm_115",
+
+  "__comment" : "---",
+
+  "drvz" : "icm_120",
+  "drvc" : "icm_121",
+  "drvm" : "icm_122",
+  "drvb" : "icm_123",
+  "drvce": "icm_124",
+  "drvzl" : "icm_125",
+  "drvu" : "icm_126",
+
+  "__comment" : "--- drzl 127-136",
+
+  "pmze": "icm_190",
+  "pms" : "icm_220",
+  "pvs" : "icm_230",
+  "pmz" : "icm_240",
+  "pvz" : "icm_250",
+  "pmh" : "icm_260",
+  "pvze": "icm_265",
+  "pvh" : "icm_270",
+  "pmb" : "icm_300",
+  "pvb" : "icm_310",
+  "pmc" : "icm_320",
+  "pvc" : "icm_330",
+
+  "obr_vo_m" : "icm_500",
+  "obr_pa_m" : "icm_510",
+
+  "obr_vo_s" : "icm_520",
+  "obr_pa_s" : "icm_530",
+
+  "obr_vo_v" : "icm_540",
+  "obr_pa_v" : "icm_550",  
+
+
+  "vao" : "icm_560",
+  "vac" : "icm_561",
+
+  "maz": "icm_581",
+  "mab": "icm_582",
+  "mac": "icm_583",
+
+  "sel" : "icm_892",
+
+  "sered" : "icm_923",
+
+  "elmr" : "icm_931",
+  "elmm" : "icm_932",
+  "elmb" : "icm_933",
+  "elmc" : "icm_934",
+  "elmz" : "icm_935",
+
+  "elvr" : "icm_941",
+  "elvm" : "icm_942",
+  "elvb" : "icm_943",
+  "elvc" : "icm_944",
+  "elvz" : "icm_945",
+
+  "dem_cr_m" : "icm_971",
+  "dem_zl_m" : "icm_972",
+  "dem_cr_s" : "icm_974",
+  "dem_zl_s" : "icm_975",
+  "dem_cr_v" : "icm_979",
+  "dem_zl_v" : "icm_980",
+
+  "arc": "icm_979",
+  "arz": "icm_997",
+
+  "__comment" : "ČR - like",
+
+  "voc": "icm_981",
+  "buc": "icm_982",
+
+  "elfz" : "icm_1000",
+  "elfb" : "icm_1001",
+
+  "pam_zl" : "icm_1021",
+  "pam_ze" : "icm_1022",
+  "pam_ru" : "icm_1023",
+  "pam_mo" : "icm_1024",
+  "pam_ce" : "icm_1025",
+  "pam_zz" : "icm_1026",
+
+  "pamt_h" : "icm_1031",
+  "pamt_z" : "icm_1032",
+  "pamt_o" : "icm_1033",
+  "pamt_b" : "icm_1034",
+  "pamt_ce": "icm_1035",
+  "pamt_y" : "icm_1036",
+
+  "pa_zl" : "icm_1041",
+  "pa_ze" : "icm_1042",
+  "pa_ru" : "icm_1043",
+  "pa_mo" : "icm_1044",
+  "pa_ce" : "icm_1045",
+  "pa_zz" : "icm_1046",
+
+  "pat_h" : "icm_1051",
+  "pat_z" : "icm_1052",
+  "pat_o" : "icm_1053",
+  "pat_b" : "icm_1054",
+  "pat_ce": "icm_1055",
+  "pat_y" : "icm_1056",
+
+  "__comment" : ""
+}
