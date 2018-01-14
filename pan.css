@@ -459,7 +459,7 @@ h1#heading:hover {
 }
 .content .iframe_wrap iframe {
   width: 175px;
-  height: -webkit-calc(100% - 90px) !important;
+  height: 100% !important;
   border:0;
   position: absolute;
   overflow-y: scroll;
