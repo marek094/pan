@@ -333,17 +333,14 @@ var pan = {
               const m = x.firstChild.title
                 .match(/^(.+) (\(P\) )?\(útok ([0-9]+), obrana ([0-9]+)\)( - ([^\(\)]+)( \(([^\(\)]+)\))?)?$/)
                 ;
-              // console.log(`-${x.firstChild.title}-`, m);
               const p = m.splice(3, 2).map(x => parseInt(x));
-              // console.log(p);
-              // console.log({attack: p[0], defence: p[1], player: m[4] || '-', clan: m[6] || '-', val: x});
               return {attack: p[0], defence: p[1], player: m[4] || '-', clan: m[6] || '-', val: x};
             })
             .sort((x,y) => {
-              if (x.attack+x.defence == y.attack+y.defence) {
+              if (2.5*x.attack+x.defence == 2.5*y.attack+y.defence) {
                 return y.attack - x.attack;
               }
-              return y.attack+y.defence - (x.attack+x.defence);
+              return 2.5*y.attack+y.defence - (2.5*x.attack+x.defence);
             })
             ;
 
@@ -358,18 +355,28 @@ var pan = {
                   ? `/i/u/${unitsTable[m[1]]}.png`
                   : img.src;
               })();
-              const erb = x.getElementsByClassName('F')[0].src;
+              const erb = x.querySelector('.F').src;
               const f = ""
                 .tagAs('img', {
-                  src: x.getElementsByClassName('R')[0].src
+                  src: x.querySelector('.R').src
                 })
                 .tagAs('div', {
                   class: 'erb',
                   style: 'background-image:url(' + erb + ')'
                 });
               const name = img.title.split(/\s*(\(|-)\s*/)[0];
-              return [f
-                     ,img.outerHTML
+              return [img.outerHTML.concat( "".tagAs('img', {
+                        src: x.querySelector('.R').src,
+                        // style: 'float: left; margin-left: 5px'
+                      }).tagAs('div', {
+                        style: `width: 30px; height: 12px; text-align: right;
+                                margin: -4px 0 0 3px;
+                                border-bottom-right-radius: 3px;
+                                border-bottom-left-radius: 3px;
+                                background: no-repeat 2px 3px url(${x.querySelector('.F').src});
+                                background-color: #61503b; padding: 5px 2px 2px 2px`,
+                        // style: 'float: right; margin-right: 5px'
+                      }))
                      ,o.attack.toString() + '<br>' + o.defence
                      ,name
                      ];

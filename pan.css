@@ -53,12 +53,14 @@ h4, h5, h6 {
   vertical-align: middle;
   padding: 2px;
 }
-.content .units td:nth-child(2) {
+.content .units td:nth-child(1) {
   border-radius: 1000px;
-  padding: 0;
+  padding: 0 0 4px 0;
   cursor: pointer;
+  text-align: center;
+  line-height: 12px;
 }
-.content .units td:nth-child(2) img {
+.content .units td:nth-child(1) img {
 }
 
 #table {
@@ -537,7 +539,7 @@ h1#heading:hover {
   margin-top: -18px;
   text-align: left;
   min-height: 100px;
-  resize: vertical; 
+  resize: vertical;
 }
 
 #edit_player_name {
