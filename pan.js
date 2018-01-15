@@ -864,8 +864,8 @@ var pan = {
 
         const inputs = ['presneHrac', 'edit_player_name', 'odeslat', 'text_area'];
         form.onsubmit = e => {
-          document.querySelector('#text_area').value =
-            document.querySelector('#text_area').value
+          form.querySelector('#text_area').value =
+            form.querySelector('#text_area').value
               .replace(/O:(-)?\)/g, '*8-*')
               .replace(/:(-)?\)/g, '*:)*')
               .replace(/\$([a-z])/g, '*x$1*')
@@ -874,14 +874,25 @@ var pan = {
               .replace(/\(y\)/g, '*u*')
               ;
           inputs.forEach( id => {
-            frameDoc.querySelector('#'+id).value = document.querySelector('#'+id).value;
-            document.querySelector('#'+id).value = "";
+            frameDoc.querySelector('#'+id).value = form.querySelector('#'+id).value;
+            form.querySelector('#'+id).value = "";
           });
           frameDoc.querySelector('#cb_admins').selectedIndex = 0;
           frameDoc.querySelector('#forum').submit();
         };
 
+        window.onbeforeunload = e => chrome.storage.local.set({
+            post: ['edit_player_name', 'text_area'].reduce( (o, id) => {
+              o[id] = form.querySelector('#'+id).value;
+              return o;
+            }, {})
+          });
 
+        chrome.storage.local.get('post', ({post: o}) => {
+            Object.entries(o).forEach( ([id, v]) => {
+              form.querySelector('#'+id).value = v;
+            });
+        });
 
       }
 
