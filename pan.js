@@ -840,8 +840,10 @@ var pan = {
               r.open('GET', href.replace('page=1', `page=${page.toString()}`));
               r.onload = e => {
                 const dom = new DOMParser().parseFromString(r.responseText, 'text/html');
-                frameDoc.querySelector('.msg_box').insertAdjacentHTML('beforeend',
-                  dom.querySelector('.msg_box').innerHTML);
+                let msgs = `strana ${page}:`
+                  .tagAs('div', {class: 'page_breaker'});
+                msgs += dom.querySelector('.msg_box').innerHTML;
+                frameDoc.querySelector('.msg_box').insertAdjacentHTML('beforeend', msgs);
               };
               r.send();
             }

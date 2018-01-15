@@ -10,7 +10,7 @@
 
 .forums_head, .forums_links, .smilies2f,
 .smilies2, .small_panel_space, .smilies_zone,
-.form_head, .page_footer,
+.form_head, .navigation, .page_footer,
 .league, .clan_position, .ranking_panel,
 .player_position, .icons_panel,
 .msg_head_send .photo_div,
@@ -25,14 +25,11 @@ body {
   overflow: hidden;
 }
 
-.navigation {
-  display: block;
-  visibility: hidden;
-  height: 40px;
-  overflow: hidden;
-}
-.navigation:first-child {
-  display: none;
+.page_breaker {
+  line-height: 40px;
+  font-size: small;
+  color: #ebcd85;
+  padding-right: 20px;
 }
 
 .msg_box {
