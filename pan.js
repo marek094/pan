@@ -328,19 +328,26 @@ var pan = {
             return JSON.parse(r.responseText);
           })();
 
-          var cont = [...document.querySelectorAll('.unit')]
+          const units = [...document.querySelectorAll('.unit')]
             .map(x => {
-              var p = x.firstChild.title
-                .match(/\(útok ([0-9]+), obrana ([0-9]+)\)/)
-                .map(x => parseInt(x));
-              return {attack: p[1], defence: p[2], val: x};}
-             )
+              const m = x.firstChild.title
+                .match(/^(.+) (\(P\) )?\(útok ([0-9]+), obrana ([0-9]+)\)( - ([^\(\)]+)( \(([^\(\)]+)\))?)?$/)
+                ;
+              // console.log(`-${x.firstChild.title}-`, m);
+              const p = m.splice(3, 2).map(x => parseInt(x));
+              // console.log(p);
+              // console.log({attack: p[0], defence: p[1], player: m[4] || '-', clan: m[6] || '-', val: x});
+              return {attack: p[0], defence: p[1], player: m[4] || '-', clan: m[6] || '-', val: x};
+            })
             .sort((x,y) => {
               if (x.attack+x.defence == y.attack+y.defence) {
                 return y.attack - x.attack;
               }
               return y.attack+y.defence - (x.attack+x.defence);
             })
+            ;
+
+          const content = units
             .map(o => {
               const x = o.val;
               const img = x.firstChild.cloneNode({deepCopy: true}.deepCopy);
@@ -373,13 +380,11 @@ var pan = {
           let res = document.createElement('div');
           res.class = 'units';
           res.innerHTML = '<br>'
-            + cont
+            + content
               .map( x => x.map(tagAs('td')).join(''))
               .map(tagAs('tr'))
               .join('')
               .tagAs('table', {class: 'units'})
-            + '<br>'
-              .tagAs('p', {style: 'line-height:300px;'})
             ;
 
           [...res.querySelectorAll('.UI')].forEach(x => {
