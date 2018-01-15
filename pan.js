@@ -807,7 +807,7 @@ var pan = {
         const iframe = pan.tabs.post.content.querySelector('#posta_frame');
         let frameDoc = null;
         let page = 1;
-        iframe.onload = e => {
+        const fnc = e => {
           // Note: remove notification from 'Forum' main link
           frameDoc = iframe.contentDocument;
 
@@ -838,12 +838,13 @@ var pan = {
               const r = new XMLHttpRequest();
               page++;
               r.open('GET', href.replace('page=1', `page=${page.toString()}`));
-              r.onload = e => {
+              r.onload = ee => {
                 const dom = new DOMParser().parseFromString(r.responseText, 'text/html');
                 let msgs = `strana ${page}:`
                   .tagAs('div', {class: 'page_breaker'});
                 msgs += dom.querySelector('.msg_box').innerHTML;
                 frameDoc.querySelector('.msg_box').insertAdjacentHTML('beforeend', msgs);
+                fnc(e);
               };
               r.send();
             }
@@ -853,6 +854,7 @@ var pan = {
           iframe.style.display = 'block';
         }
 
+        iframe.onload = fnc;
 
 
         form.querySelector('#text_area').oninput = ({target: el}) => {
@@ -895,18 +897,18 @@ var pan = {
     //     var hrac = d=>[...d.querySelectorAll('img.UI')].map(({title: x}) => x.match(/(.*)- Larkin II \(.*/)).filter(f=>f&&f[1]).map(([,x])=>x)
     //     var prase = d=>[...d.querySelectorAll('img.UI')].map(x=>[x.src.match(/\/dv_/),x.id]).filter(([f])=>f&&f[0]).map(([,x]) => x)
     //     /*
-    //     document.body.innerText.split('\n').map(x=>x.split('>')).filter(f=>f && f[2]=='orc').forEach(([x,y,t,m])=>{
-    //       const r = new XMLHttpRequest();
-    //       const u = `/main.aspx?x=${x}&y=${y}`;
-    //       r.open('GET', u, false);
-    //       r.onload = e => {
-    //           var z = new DOMParser().parseFromString(r.responseText, 'text/html');
-    //           console.log(drak(z)+prase(z)+'\t'+u+'\n')
-    //
-    //         };
-    //       console.log('> ' + u + '\t\t' + [x,y,t,m]);
-    //       r.send();
-    //     })
+        // document.body.innerText.split('\n').map(x=>x.split('>')).filter(f=>f && f[2]=='orc').forEach(([x,y,t,m])=>{
+        //   const r = new XMLHttpRequest();
+        //   const u = `/main.aspx?x=${x}&y=${y}`;
+        //   r.open('GET', u, false);
+        //   r.onload = e => {
+        //       var z = new DOMParser().parseFromString(r.responseText, 'text/html');
+        //       console.log(drak(z)+prase(z)+'\t'+u+'\n')
+        //
+        //     };
+        //   console.log('> ' + u + '\t\t' + [x,y,t,m]);
+        //   r.send();
+        // })
     //     */
     //     pan.tabs.geography.content.innerHTML = ""
     //     + []
