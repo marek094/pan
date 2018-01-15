@@ -10,7 +10,7 @@
 
 .forums_head, .forums_links, .smilies2f,
 .smilies2, .small_panel_space, .smilies_zone,
-.form_head, .navigation, .page_footer,
+.form_head, .page_footer,
 .league, .clan_position, .ranking_panel,
 .player_position, .icons_panel,
 .msg_head_send .photo_div,
@@ -25,6 +25,16 @@ body {
   overflow: hidden;
 }
 
+.navigation {
+  display: block;
+  visibility: hidden;
+  height: 40px;
+  overflow: hidden;
+}
+.navigation:first-child {
+  display: none;
+}
+
 .msg_box {
   width: 100% !important;
   position: fixed !important;
@@ -32,7 +42,8 @@ body {
   /* bottom: 200px; */
   left: 0;
   /* height: 200px !important; */
-  height: -webkit-calc(100% - 150px);
+  /* height: -webkit-calc(100% - 150px); */
+  height: 100%;
   overflow-x: scroll;
   z-index: 10;
   padding:0 0 100px 0;
@@ -200,7 +211,30 @@ body {
   /* height: 250px; */
 }
 
+.msg_box, .form_box, .msg_head_send,
+.editbox, .msg_head_send + .msg_core,
+#edit_player_name, .form_core {
+  border-top-right-radius: 18px;
+}
 
+.msg_head_receive,
+.msg_head_receive + .msg_core {
+  border-top-left-radius: 18px;
+}
+
+.msg_head_send + .msg_core {
+  border-bottom-right-radius: 18px;
+}
+
+.msg_head_receive + .msg_core {
+  border-bottom-left-radius: 18px;
+}
+
+.form_box {
+  display: none;
+}
+
+/*
 .form_box * {
   margin: 0;
   padding: 0;
@@ -253,7 +287,7 @@ body {
   position: static;
   top: 0;
   background: #1a140f;
-  /* color: #EEB844; */
+  _color: #EEB844;
   color: #CC7744;
   line-height: 1.3;
   padding: 5px 5px;
@@ -272,7 +306,6 @@ body {
 
 .cb_zone {
   margin: 0 !important;
-  /* position: absolute; */
   height: auto;
 }
 
@@ -290,4 +323,4 @@ body {
   margin: 0 !important;
   height: 40px;
   margin-top:-12px !important;
-}
+} */

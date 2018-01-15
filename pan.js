@@ -120,10 +120,10 @@ var kDISPLAYED = "0px";
 var kHOVERED = "-190px";
 var kHEALTH_WAITING = -1;
 
-var injectExec = function(codeLambda) {
+var injectExec = function(codeLambda, doc) {
   var script = document.createElement('script');
   script.textContent = '(' + codeLambda + ')();';
-  (document.head||document.documentElement).appendChild(script);
+  (doc || document.head || document.documentElement).appendChild(script);
   // alert('s!');
   script.remove();
 }
@@ -354,10 +354,9 @@ var pan = {
               img.dataset.id = o.val.id.slice(1);
               img.src = (() => {
                 let m = img.src.match(/\/i\/u\/(\w+)_\d_\df?s?\.gif$/);
-                if (m && unitsTable[m[1]]) {
-                  return `/i/u/${unitsTable[m[1]]}.png`;
-                }
-                return img.src;
+                return m && unitsTable[m[1]]
+                  ? `/i/u/${unitsTable[m[1]]}.png`
+                  : img.src;
               })();
               const erb = x.getElementsByClassName('F')[0].src;
               const f = ""
@@ -787,25 +786,35 @@ var pan = {
             class: 'iframe_wrap',
             scrolling: 'no'
           })
+          .concat(`
+              <div class="form_post">
+              <form name="forum" id="forum" onsubmit="return false" method="post">
+              <div class="input_wrap">
+                <input type="text" name="edit_player_name" id="edit_player_name"
+                       class="f-tb" placeholder="adresát">
+              </div>
+              <textarea class="editbox"rows="5" id="text_area" name="text_area"></textarea>
+              <input type="hidden" name="presneHrac" id="presneHrac" value="">
+              <input type="image" name="odeslat" id="odeslat" src="i/forums/button_send.gif"
+                     onmouseover="this.src='i/forums/button_send_a.gif'"
+                     onmouseout="this.src='i/forums/button_send.gif'">
+              </form>
+              </div>`
+          )
           ;
 
+        const form = pan.tabs.post.content.querySelector('#forum');
         const iframe = pan.tabs.post.content.querySelector('#posta_frame');
-        // alert(pan.tabs.post.content.innerHTML);
-        iframe.onload = function (e) {
+        let frameDoc = null;
+        let page = 1;
+        iframe.onload = e => {
           // Note: remove notification from 'Forum' main link
-
-          let frameDoc = iframe.contentDocument;
-          let submit = frameDoc.getElementById('odeslat');
-          let input = frameDoc.getElementById('edit_player_name');
-          let textarea = frameDoc.getElementById('text_area');
-
-          input.placeholder = 'adresát';
-          [input, textarea, submit].forEach((e,i)=>{e.tabindex = i+10});
+          frameDoc = iframe.contentDocument;
 
           const style = frameDoc.createElement('style');
           style.innerText = '@import url("' + chrome.extension.getURL('posta.css') + '");';
           frameDoc.body.appendChild(style);
-          const as = [...frameDoc.querySelectorAll('.msg_box a')]
+          const as = [...frameDoc.querySelectorAll('.msg_text a')]
           as.forEach(x => x.target='top');
           as.map(x => [x, x.href.match(/^javascript:(.*)$/)])
             .filter(([,m]) => m && m[1])
@@ -814,12 +823,64 @@ var pan = {
               x = {href: '#javascript', target: ""};
               x.onmouseup = e => false;
               x.onmousedown = e => false;
-              // console.log(x);
             });
 
+          [...frameDoc.querySelectorAll('.player_name_div')].forEach( el => {
+            el.onclick = e => {
+              form.querySelector('#edit_player_name').value =
+                el.querySelector('.player_name').innerText;
+            };
+          });
+
+          const {href: href} = frameDoc.querySelector('.navigation a:first-child');
+          frameDoc.querySelector('.msg_box').onscroll = ({target: el}) => {
+            if (el.scrollHeight - el.scrollTop === el.clientHeight) {
+              const r = new XMLHttpRequest();
+              r.open('GET', href.replace('page=1', `page=${page.toString()}`));
+              r.onload = e => {
+                page++;
+                const dom = new DOMParser().parseFromString(r.responseText, 'text/html');
+                frameDoc.querySelector('.msg_box').insertAdjacentHTML('beforeend',
+                  dom.querySelector('.msg_box').innerHTML);
+              };
+              r.send();
+            }
+          };
+
+          frameDoc.querySelector('.player_name_div').click();
           iframe.style.display = 'block';
         }
+
+
+
+        form.querySelector('#text_area').oninput = ({target: el}) => {
+          el.style.height = "";
+          el.style.height = Math.min(el.scrollHeight, iframe.clientHeight) + 'px';
+        };
+
+        const inputs = ['presneHrac', 'edit_player_name', 'odeslat', 'text_area'];
+        form.onsubmit = e => {
+          document.querySelector('#text_area').value =
+            document.querySelector('#text_area').value
+              .replace(/O:(-)?\)/g, '*8-*')
+              .replace(/:(-)?\)/g, '*:)*')
+              .replace(/\$([a-z])/g, '*x$1*')
+              .replace(/\$\$/g, '*-*')
+              .replace(/\$/g,'*xp*')
+              .replace(/\(y\)/g, '*u*')
+              ;
+          inputs.forEach( id => {
+            frameDoc.querySelector('#'+id).value = document.querySelector('#'+id).value;
+            document.querySelector('#'+id).value = "";
+          });
+          frameDoc.querySelector('#cb_admins').selectedIndex = 0;
+          frameDoc.querySelector('#forum').submit();
+        };
+
+
+
       }
+
     },
 
     // geography: {
@@ -871,6 +932,8 @@ var pan = {
               <p>Tip: Dvojklikem na odkaz v&nbsp;menu se celá sekce načte znovu.
               </p>
               <p>Tip: Dvojklikem na bojující dvojici v&nbsp;sekci 'Boje' se souboj trvale připne.
+              </p>
+              <p>Tip: Při psaní zprávy zkuste použít '$', '$$', '$j', ':)', 'O:-)'
               </p>
               <h4>Užitečné odkazy</h4>
               <ul>

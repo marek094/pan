@@ -36,6 +36,7 @@ h4, h5, h6 {
   overflow-y: scroll;
   overflow-x: hidden;
   height: 100%;
+  position: relative;
 }
 .content table, .content tr, .content td, .content th {
   margin:0;
@@ -456,12 +457,13 @@ h1#heading:hover {
 }
 
 .content .iframe_wrap {
+  height: -webkit-calc(100% - 160px + 18px);
 }
 .content .iframe_wrap iframe {
   width: 175px;
   height: 100% !important;
   border:0;
-  position: absolute;
+  /* position: absolute; */
   overflow-y: scroll;
   overflow-x: hidden;
   z-index: 10030;
@@ -481,4 +483,96 @@ h1#heading:hover {
   text-decoration: underline;
   color: #d5912b;
   text-align: center;
+}
+
+/* FORM_POST */
+
+.form_post {
+  text-align: center;
+  border-top: 2px solid #221718;
+  margin-top: -18px;
+  position: absolute;
+  width: -webkit-calc(100% - 5px);
+  bottom:0;
+  /* height: 110px; */
+}
+
+.msg_box, .form_box, .msg_head_send,
+.editbox, .msg_head_send + .msg_core,
+#edit_player_name, .form_core,
+.form_post, #edit_player_name, .input_wrap {
+  border-top-right-radius: 18px;
+}
+
+.msg_head_receive,
+.msg_head_receive + .msg_core {
+  border-top-left-radius: 18px;
+}
+
+.msg_head_send + .msg_core {
+  border-bottom-right-radius: 18px;
+}
+
+.msg_head_receive + .msg_core {
+  border-bottom-left-radius: 18px;
+}
+
+.editbox, #edit_player_name {
+  width: 100% !important;
+  padding: 0 5px;
+  margin: 0;
+  border:0;
+  box-sizing: border-box;
+  display: block;
+  font-family: 'Times New Roman',  Times, serif;
+  font-size: 15px;
+}
+
+.editbox {
+  background: #1a140f;
+  color: #CC7744;
+  line-height: 20px;
+  padding: 5px 5px;
+  font-size: 15px;
+  margin-top: -18px;
+  text-align: left;
+  min-height: 100px;
+  resize: vertical; 
+}
+
+#edit_player_name {
+  /* position: absolute; */
+  /* top: 0; */
+  line-height: 28px;
+  color: #d5912b;
+  font-style: italic;
+  text-decoration: underline;
+  background: #503c31;
+}
+
+.input_wrap {
+  background: #503c31;
+  padding-bottom: 18px;
+}
+
+.cb_zone {
+  margin: 0 !important;
+  height: auto;
+}
+
+.cb_zone table td {
+  font-size: 0;
+}
+
+#odeslat {
+  border: 0;
+  width: 75px !important;
+  height: 23px;
+  margin: 0 auto;
+}
+
+.button_send {
+  margin: 0 !important;
+  height: 40px;
+  /* margin-top:-12px !important; */
 }
