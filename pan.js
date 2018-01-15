@@ -837,8 +837,8 @@ var pan = {
             if (el.scrollHeight - el.scrollTop === el.clientHeight) {
               const r = new XMLHttpRequest();
               r.open('GET', href.replace('page=1', `page=${page.toString()}`));
+              page++;
               r.onload = e => {
-                page++;
                 const dom = new DOMParser().parseFromString(r.responseText, 'text/html');
                 frameDoc.querySelector('.msg_box').insertAdjacentHTML('beforeend',
                   dom.querySelector('.msg_box').innerHTML);
