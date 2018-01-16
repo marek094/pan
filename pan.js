@@ -366,19 +366,13 @@ var pan = {
                 });
               const name = img.title.split(/\s*(\(|-)\s*/)[0];
               return [img.outerHTML.concat( "".tagAs('img', {
-                        src: x.querySelector('.R').src,
-                        // style: 'float: left; margin-left: 5px'
+                        src: x.querySelector('.R').src
                       }).tagAs('div', {
-                        style: `width: 30px; height: 12px; text-align: right;
-                                margin: -4px 0 0 3px;
-                                border-bottom-right-radius: 3px;
-                                border-bottom-left-radius: 3px;
-                                background: no-repeat 2px 3px url(${x.querySelector('.F').src});
-                                background-color: #61503b; padding: 5px 2px 2px 2px`,
-                        // style: 'float: right; margin-right: 5px'
+                        class: 'unit_info',
+                        style: `background-image: url(${x.querySelector('.F').src})`
                       }))
-                     ,o.attack.toString() + '<br>' + o.defence
-                     ,name
+                     , o.attack.toString().concat('<br>').concat(o.defence).tagAs('div')
+                     , name.tagAs('div')
                      ];
             })
             ;

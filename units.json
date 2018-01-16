@@ -82,6 +82,8 @@
   "__comment" : "--- drzl 127-136",
 
   "pmze": "icm_190",
+  "pmcv": "icm_200",
+  "pvcv": "icm_210",
   "pms" : "icm_220",
   "pvs" : "icm_230",
   "pmz" : "icm_240",

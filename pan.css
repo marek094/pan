@@ -46,21 +46,60 @@ h4, h5, h6 {
 .content tr {
   color: #eacd86;
 }
-.content .units table {
+.content table.units {
   color: #dcaf67;
+  padding-right: 2px;
 }
+.content .units tr {
+  display: flex;
+  margin-top: -18px;
+  flex-direction: row-reverse;
+  padding: 0 0 0 44px;
+  text-align: right;
+}
+.content .units tr:nth-child(2n+1) {
+  flex-direction: row;
+  padding: 0 44px 0 0;
+}
+
 .content .units td {
   vertical-align: middle;
   padding: 2px;
+  /* align-items: center; */
 }
-.content .units td:nth-child(1) {
+
+.content .units td:nth-child(2),
+.content .units td:nth-child(3) {
+  display: flex;
+  align-items: center;
+  /* flex-direction: column; */
+}
+
+.content .units td:first-child {
   border-radius: 1000px;
   padding: 0 0 4px 0;
   cursor: pointer;
   text-align: center;
   line-height: 12px;
 }
-.content .units td:nth-child(1) img {
+.content .units td:first-child img {
+  max-width: 40px;
+}
+
+.content .units tr:nth-child(2n) td {
+  text-align: right;
+}
+
+.content .units .unit_info {
+  width: 30px;
+  height: 12px;
+  text-align: right;
+  margin: -4px 0 0 3px;
+  border-bottom-right-radius: 3px;
+  border-bottom-left-radius: 3px;
+  background: no-repeat 2px 3px;
+  background-color: #61503b;
+  padding: 5px 2px 2px 2px;
 }
 
 #table {
@@ -69,9 +108,9 @@ h4, h5, h6 {
 }
 
 h1#heading {
-  padding:15px 40px 0 0;
-  text-align:center;
-  font-size:16px;
+  padding: 15px 40px 0 0;
+  text-align: center;
+  font-size: 16px;
   background: no-repeat 72px 0px url('http://www.panhradu.cz/i/u/dem_cr_v_3_3.gif');
   line-height: 40px;
   border-bottom-right-radius: 30px;
