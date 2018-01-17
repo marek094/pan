@@ -356,11 +356,9 @@ var pan = {
                   : img.src;
               })();
               const name = img.title.split(/\s*(\(|-)\s*/)[0];
+              const attrs = {class: 'opaciable', 'data-player': o.player};
               return [img.outerHTML
-                        .tagAs('div', {
-                          class: 'opaciable',
-                          'data-player': o.player
-                        })
+                        .tagAs('div', attrs)
                         .concat( "".tagAs('div', {
                           class: 'rank',
                           'data-player': o.player,
@@ -371,11 +369,11 @@ var pan = {
                           'data-player': o.player,
                           style: `background-image: url(${x.querySelector('.F').src})`
                         }))
-                     , o.attack.toString().concat('<br>').concat(o.defence).tagAs('div')
+                     , o.attack.toString().concat('<br>').concat(o.defence).tagAs('div', attrs)
                      , name
                         .replace('Raněný zbrojnoš Béďa', 'Zbrojnoš Béďa')
                         .replace('Tvůj zbrojnoš Otakar', 'Zbrojnoš Otakar')
-                        .tagAs('div', {class: 'opaciable', 'data-player': o.player})
+                        .tagAs('div', attrs)
                      ];
             })
             ;
@@ -394,10 +392,36 @@ var pan = {
             x.onclick = e => injectExec('()=>unit.showUnitInfo('+e.target.dataset.id + ')');
           });
 
-          const toggleOpponents = ({target: {dataset: {player: p}}}) =>
-            p && [...res.querySelectorAll(`.opaciable:not([data-player="${p}"])`)].forEach( ell =>
-              ell && (ell.style.opacity = ell.style.opacity == '0.4' ? '1' : '0.4')
-            );
+          let oUnitsSelected;
+          const toggleOpponents = ({target: {dataset: {player: p}}, type: type}, force) => {
+            const all = [...res.querySelectorAll('.opaciable')];
+            const selectAll = () => all.forEach( el => el.style.opacity = '1');
+            const selectPart = p => all.forEach( el => el.style.opacity = p == el.dataset.player ? '1' : '0.4');
+            if (type == 'load') {
+              if (oUnitsSelected) selectPart(oUnitsSelected);
+            } else if (type == 'dblclick') {
+              if (oUnitsSelected && oUnitsSelected == p) {
+                oUnitsSelected = undefined;
+                selectAll();
+                chrome.storage.sync.remove('unitsSelected');
+              } else {
+                oUnitsSelected = p;
+                selectPart(p);
+                chrome.storage.sync.set({unitsSelected: oUnitsSelected});
+              }
+            } else if (oUnitsSelected) {
+              // nothing
+            } else if (type == 'mouseover') {
+              selectPart(p);
+            } else if (type == 'mouseout') {
+              selectAll(p);
+            }
+          };
+
+          chrome.storage.sync.get('unitsSelected', ({unitsSelected: p}) => {
+            oUnitsSelected = p;
+            toggleOpponents({target: {dataset: {player:p}}, type: 'load'});
+          });
 
           [...res.querySelectorAll('.rank')].forEach( el => {
             el.onmouseover = toggleOpponents;
@@ -427,13 +451,11 @@ var pan = {
             const size = Math.round(width / 64);
             m[coor.join()] = {img: img, dir: d-1, id: parseInt(id.slice(1)), name: title, size: size};
             // TODO : make (2x2) sizes work properly
-            // console.log(size);
             for (let i=0; i < dirs[size].length; ++i) {
               let ds = dirs[size][i][d-1];
               let p = m[[coor[0]+ds[0], coor[1]+ds[1]].join()];
               if (p) ps.push([m[coor.join()], p]);
             }
-            // console.log([m, ps]);
             return [m, ps];
           }, [{}, []])
           .pop()
@@ -521,7 +543,6 @@ var pan = {
               chrome.storage.sync.set(oo);
             } else {
               ids.forEach( id => {
-                // alert(o.health[id]);
                 if (!oo['health_'+id]) return;
                 oo['health_'+id].filter(({time: t}) => saved.startTime <= t).forEach( h => {
                   // console.log(id, v);
@@ -987,7 +1008,7 @@ var pan = {
               <ul>
                 <li><a href="/help/rady_veterana.htm" target="_blank">
                     Veteránova nápoveda</a></li>
-              </ul>              
+              </ul>
               <p>&nbsp;</p>
           `;
 
