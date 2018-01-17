@@ -355,27 +355,27 @@ var pan = {
                   ? `/i/u/${unitsTable[m[1]]}.png`
                   : img.src;
               })();
-              const erb = x.querySelector('.F').src;
-              const f = ""
-                .tagAs('img', {
-                  src: x.querySelector('.R').src
-                })
-                .tagAs('div', {
-                  class: 'erb',
-                  style: 'background-image:url(' + erb + ')'
-                });
               const name = img.title.split(/\s*(\(|-)\s*/)[0];
-              return [img.outerHTML.concat( "".tagAs('img', {
-                        src: x.querySelector('.R').src
-                      }).tagAs('div', {
-                        class: 'unit_info',
-                        style: `background-image: url(${x.querySelector('.F').src})`
-                      }))
+              return [img.outerHTML
+                        .tagAs('div', {
+                          class: 'opaciable',
+                          'data-player': o.player
+                        })
+                        .concat( "".tagAs('div', {
+                          class: 'rank',
+                          'data-player': o.player,
+                          title: `${o.player} (${o.clan})`,
+                          style: `background-image: url(${x.querySelector('.R').src})`
+                        }).tagAs('div', {
+                          class: 'unit_info opaciable',
+                          'data-player': o.player,
+                          style: `background-image: url(${x.querySelector('.F').src})`
+                        }))
                      , o.attack.toString().concat('<br>').concat(o.defence).tagAs('div')
                      , name
                         .replace('Raněný zbrojnoš Béďa', 'Zbrojnoš Béďa')
                         .replace('Tvůj zbrojnoš Otakar', 'Zbrojnoš Otakar')
-                        .tagAs('div')
+                        .tagAs('div', {class: 'opaciable', 'data-player': o.player})
                      ];
             })
             ;
@@ -392,6 +392,17 @@ var pan = {
 
           [...res.querySelectorAll('.UI')].forEach(x => {
             x.onclick = e => injectExec('()=>unit.showUnitInfo('+e.target.dataset.id + ')');
+          });
+
+          const toggleOpponents = ({target: {dataset: {player: p}}}) =>
+            p && [...res.querySelectorAll(`.opaciable:not([data-player="${p}"])`)].forEach( ell =>
+              ell && (ell.style.opacity = ell.style.opacity == '0.4' ? '1' : '0.4')
+            );
+
+          [...res.querySelectorAll('.rank')].forEach( el => {
+            el.onmouseover = toggleOpponents;
+            el.onmouseout = toggleOpponents;
+            el.ondblclick = toggleOpponents;
           });
 
           return res;
@@ -957,6 +968,11 @@ var pan = {
               <p>Projekt sídlí a je ke stažení na
                 <a href="https://github.com/marek094/pan">GitHub.com</a>
               </p>
+              <h3>Nastavení</h3>
+              <p id="clear_data_notif"></p>
+              <p>
+                <label for="clear_data">Smaž uložená data: </label><button id="clear_data">reset</button>
+              </p>
               <h4>Nápověda</h4>
               <p>Tip: Dvojklikem na odkaz v&nbsp;menu se celá sekce načte znovu.
               </p>
@@ -964,16 +980,15 @@ var pan = {
               </p>
               <p>Tip: Při psaní zprávy zkuste použít '$', '$$', '$j', ':)', 'O:-)'
               </p>
+              <p>Tip: Pro skrytí oponentů v přehledech najeďte na hodnost jednotky.
+                  Pro trvalé dvojkliknete.
+              </p>
               <h4>Užitečné odkazy</h4>
               <ul>
                 <li><a href="/help/rady_veterana.htm" target="_blank">
                     Veteránova nápoveda</a></li>
-              </ul>
-              <h3>Nastavení</h3>
-              <p id="clear_data_notif"></p>
-              <p>
-                <label for="clear_data">Smaž uložená data: </label><button id="clear_data">reset</button>
-              </p>
+              </ul>              
+              <p>&nbsp;</p>
           `;
 
           content.querySelector('#clear_data').onclick = e => chrome.storage.sync.clear(() =>

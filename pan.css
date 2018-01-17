@@ -49,17 +49,17 @@ h4, h5, h6 {
 .content table.units {
   color: #dcaf67;
   padding-right: 2px;
+  width: 100%;
 }
 .content .units tr {
   display: flex;
-  margin-top: -22px;
-  flex-direction: row-reverse;
-  padding: 0 0 0 44px;
   text-align: right;
+  flex-direction: row-reverse;
+  margin: -22px 0 0 44px;
 }
 .content .units tr:nth-child(2n+1) {
   flex-direction: row;
-  padding: 0 44px 0 0;
+  margin: -22px 44px 0 0;
 }
 
 .content .units td {
@@ -91,15 +91,21 @@ h4, h5, h6 {
 }
 
 .content .units .unit_info {
-  width: 30px;
-  height: 12px;
+  width: 34px;
+  height: 19px;
   text-align: right;
   margin: -4px 0 0 3px;
   border-bottom-right-radius: 3px;
   border-bottom-left-radius: 3px;
   background: no-repeat 2px 3px;
   background-color: #61503b;
-  padding: 5px 2px 2px 2px;
+  /* padding: 5px 2px 2px 2px; */
+}
+
+.content .units .rank {
+  width: 34px;
+  height: 19px;
+  background: no-repeat 14px 6px;
 }
 
 #table {
