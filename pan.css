@@ -52,7 +52,7 @@ h4, h5, h6 {
 }
 .content .units tr {
   display: flex;
-  margin-top: -18px;
+  margin-top: -22px;
   flex-direction: row-reverse;
   padding: 0 0 0 44px;
   text-align: right;

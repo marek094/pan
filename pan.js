@@ -331,7 +331,7 @@ var pan = {
           const units = [...document.querySelectorAll('.unit')]
             .map(x => {
               const m = x.firstChild.title
-                .match(/^(.+) (\(P\) )?\(útok ([0-9]+), obrana ([0-9]+)\)( - ([^\(\)]+)( \(([^\(\)]+)\))?)?$/)
+                .match(/^(.*) (\(P\) )?\(útok ([0-9]+), obrana ([0-9]+)\)( - ([^\(\)]+)( \(([^\(\)]+)\))?)?$/)
                 ;
               const p = m.splice(3, 2).map(x => parseInt(x));
               return {attack: p[0], defence: p[1], player: m[4] || '-', clan: m[6] || '-', val: x};
@@ -372,7 +372,10 @@ var pan = {
                         style: `background-image: url(${x.querySelector('.F').src})`
                       }))
                      , o.attack.toString().concat('<br>').concat(o.defence).tagAs('div')
-                     , name.tagAs('div')
+                     , name
+                        .replace('Raněný zbrojnoš Béďa', 'Zbrojnoš Béďa')
+                        .replace('Tvůj zbrojnoš Otakar', 'Zbrojnoš Otakar')
+                        .tagAs('div')
                      ];
             })
             ;
@@ -750,13 +753,23 @@ var pan = {
                   ;
                 });
             } else { // x.type != 'food'
-              const amounts = [1000, 2000, 3000, 5000, 8000, 10000, 15000, 20000, 30000, 40000, 50000];
+              const amounts = [1000, 2000, 3000, 5000, 8000, 10000, 12000,
+                               15000, 20000, 25000, 30000, 35000, 40000, 45000,
+                               50000, 55000, 60000, 70000, 80000, 90000, 1000000];
+              const time = y => (y-x.amount)/x.inc;
               result.innerHTML += amounts
                 .filter( v => x.amount <= v && v < capacity)
+                .filter( function(v, i, a) {
+                  if (i == 0 || time(v) - time(a[this.last]) >= 60) {
+                    this.last = i;
+                    return true;
+                  }
+                  return false;
+                })
                 .concat([capacity])
                 .slice(0, 5)
                 .map( v => parseInt(v))
-                .map( v => tr(toAmount(v), toTime((v-x.amount)/x.inc, actm)))
+                .map( v => tr(toAmount(v), toTime(time(v), actm)))
                 .join("")
                 ;
             }
