@@ -74,7 +74,7 @@ var tagAs = function (tag) {
 }
 
 var say = function (text) {
-  let titles = ['Pane můj', 'Vládče náš', 'Ty, duše hříšná', 'Pane tohoto hradu'];
+  let titles = ['Pane můj', 'Vládče náš', 'Ty, duše hříšná', 'Pane hradu', 'Králi', 'Veličenstvo'];
   return tagAs('p')(
     titles[Math.floor(Math.random() * titles.length)] + ', ' + text + '.'
   );
@@ -265,11 +265,12 @@ var pan = {
 
       init: function () {
         const self = pan.tabs.summary;
+        self.content.innerHTML = "";
         Object.values(self.sections).forEach( x => self.content.appendChild(x()) );
       },
 
       sections: {
-        playerName: function() {
+        info: function() {
           let res = document.createElement('div');
           let title = [...document.querySelectorAll('img.L2')]
             .filter(({src:x}) => x.match(/i\/b\/(ves|c)[0-9]\w+/))
@@ -278,16 +279,40 @@ var pan = {
             .map(([x,]) => x)
             ;
 
-          let pC = x => x.tagAs('p', {style: 'text-align: center'})
-
-          // console.log(title);
-          res.innerHTML = (title || "")
-            .map(x => x.match(/\(([^\(]*)\)$/))
-            // .filter(x => x)
-            .map(x => (x && x[1]) ? x[1].tagAs('p', {class:'player_name'})
-                                  : pC('Tvoje území'))
-            .join(pC(' & '))
-            .ifEmpty(pC(say('tohle území nikomu nepatří')))
+          const areas = {'Truhlárna': [4, 'wood'], 'Kamenictví': [3, 'stone'],
+                         'Kovárna': [6,'iron']};
+          let pC = x => x.tagAs('p', {style: 'text-align: center'});
+          res.innerHTML = [...document.querySelectorAll('.building img')]
+            .map( ({title: t}) => t.match(/([^-]+) - level (\d)( \(([^\(\)]+)\))?/) )
+            .filter( x => x)
+            .map( ([, c, l,, p]) => ({name: c, level: parseInt(l), player: p || ""}) )
+            .sort( ({player: a}, {player: b}) => (a < b) - (b < a) )
+            .filter( ({name: c}) => c in areas || 1+['Vesnice', 'Hrad'].indexOf(c) )
+            .groupBy( ({player: x}) => x )
+            .map( x => [ x.front().player, x
+                .filter( ({name: c}) => c in areas)
+                .reduce(
+                  (o, {name: n, level: l}) => { o[n] += l; return o },
+                  Object.keys(areas).reduce( (o, k) => { o[k] = 0; return o }, {})
+                )
+              ]
+            )
+            .map( ([player, x]) => (player
+                ? player.tagAs('span', {class: 'player_name'})
+                : 'Tvoje území'
+              )
+              + '<br>'
+              + Object.entries(x).map( ([k, v]) => `(+${v/areas[k].front()})&nbsp;`
+                  .tagAs('span', {
+                    class: 'amount ' + areas[k].back(),
+                    // style: 'font-size: 11px',
+                    title: k
+                  })
+              ).join('')
+            )
+            .map( x => x.tagAs('p', {style: 'text-align: center'}) )
+            .join('&'.tagAs('p', {style: 'text-align: center'}))
+            .ifEmpty(say('toto území nikomu neptří'))
             ;
           return res;
         },
