@@ -31,6 +31,7 @@
   "bez": "icm_24",
   "be" : "icm_25",
   "bec": "icm_26",
+  "sed": "icm_27",
 
   "orsa" :  "icm_30",
   "orsese": "icm_31",
@@ -117,7 +118,10 @@
   "mab": "icm_582",
   "mac": "icm_583",
 
-  "sel" : "icm_892",
+  "selpr": "icm_891",
+  "sel"  : "icm_892",
+  "selsv": "icm_893",
+  "selch": "icm_894",
 
   "sered" : "icm_923",
 
