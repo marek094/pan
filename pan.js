@@ -700,9 +700,9 @@ var pan = {
               .slice(-2)
               .map( ({innerText: x}) => x)
               .join("")
-              .replace(/^[^]*(Budova se přestav)uje[^]*$/, `$1í ${level-1}&nbsp;➟&nbsp;${level}`)
-              .replace(/^[^]*(Budova se )(staví)[^]*$/, '$1po$2')
-              .replace(/^[^]*(Budova se )(boří)[^]*$/, '$1z$2')
+              .replace(/^[^]*(Budova se přestav)uje[^]*$/, `$1í: ${level-1}&nbsp;➟&nbsp;${level}`)
+              .replace(/^[^]*(Budova se )(staví)[^]*$/, '$1po$2.')
+              .replace(/^[^]*(Budova se )(boří)[^]*$/, '$1z$2.')
               ;
           } else {
             return dom.outerHTML;
@@ -773,7 +773,7 @@ var pan = {
                     'vrátí se': '',
                     'v cíli bude': ,
                     undefined: null
-                }[subj]*/ subj ],
+                }[subj]*/ subj + ':' ],
                 body: units
                   .replace(/\<(img)/g, '[$1')
                   .split(/\<[^\>\<]\>/)
@@ -794,7 +794,7 @@ var pan = {
         r.send({});
 
         // Field events
-        dynamicLine.push(...['dnes'].map( day =>
+        dynamicLine.push(...['dnes', 'zítra', 'včera'].map( day =>
           [1, 4, 7, 10, 13, 16, 19, 22].map( hour => ({
               time: pan.tabs.timeline.parseDateTime(`${day} v ${hour}:01`),
               type: ['sklizen', 'Sklizeň', -1],
