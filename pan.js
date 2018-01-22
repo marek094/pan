@@ -1,10 +1,10 @@
 
 Array.prototype.groupBy = function (selector) { return this
-  .reduceRight( ([[xs,...xss], lv], w) => {
-      const v = selector(w);
+  .reduceRight( ([[xs,...xss], lv], w, i) => {
+      const v = selector(w, i);
       const x = xs ? [xs,...xss] : [];
       return [lv==v ? [[w,...xs],...xss] : [[w],...x], v];
-    }, [[], undefined ] )
+    }, [[], undefined] )
   .shift()
   ;
 }
@@ -18,8 +18,16 @@ Array.prototype.front = function (val) {
   return this[0];
 }
 
+Array.prototype.init = function (ix = 1) { return this.slice(0, -ix); }
+Array.prototype.tail = function (ix = 1) { return this.slice(ix); }
+
 Array.prototype.flat = function () { return this
   .reduce((xs, x) => xs.concat(x), [])
+  ;
+}
+
+Array.prototype.tee = function (f = console.log) { return this
+  .map( x => {f(x); return x})
   ;
 }
 
@@ -29,6 +37,11 @@ Array.prototype.ifEmpty = function (val) {
 
 Array.prototype.ifEmptyElse = function (val, callback) {
   return this.length ? callback(this) : val;
+}
+
+String.prototype.tee = function () {
+  console.log(this);
+  return this;
 }
 
 String.prototype.ifEmpty = function (val) {
@@ -50,6 +63,11 @@ String.prototype.tagAs = function (tag, args) { // k=='style' ? v : v
   return res;
 }
 
+String.prototype.toInt = function () { return parseInt(this, 10); }
+
+String.prototype.escape = function() { return this.replace(/("|')/g, '\\$&'); }
+
+// console.log("tag=''".escape());
 // chrome.storage.onChanged.addListener(function(c){
 //   console.log(c);
 // });
@@ -74,11 +92,20 @@ var tagAs = function (tag) {
 }
 
 var say = function (text) {
-  let titles = ['Pane můj', 'Vládče náš', 'Ty, duše hříšná', 'Pane hradu', 'Králi', 'Veličenstvo'];
+  let titles = ['Pane můj', 'Vládče náš', 'Ty, duše hříšná',
+                'Pane hradu', 'Králi', 'Veličenstvo', 'Náš králi'];
   return tagAs('p')(
     titles[Math.floor(Math.random() * titles.length)] + ', ' + text + '.'
   );
 }
+
+// TODO: yesterday of 1.1.201x
+const dateSettings = { month:'numeric', day:'numeric', hour:'numeric', minute:'2-digit' };
+const timeSettings = { hour:'numeric', minute:'2-digit' };
+const  daySettings = { month:'numeric', day:'numeric' };
+const today     = new Date(new Date().setSeconds(0));
+const tomorrow  = new Date(today.getTime() + 24*60*60*1000);
+const yesterday = new Date(today.getTime() - 24*60*60*1000);
 
 const mainLinks = document.querySelectorAll('#div_gui_main a');
 const [lAct, lCastle, ...lDorp] = Array.from(mainLinks)
@@ -131,7 +158,7 @@ var injectExec = function(codeLambda, doc) {
 const dirs =
   [ []
   , [[[0,-1],[1,0],[0,1],[-1,0]]] // size = 1 (1x1)
-  , [[[0,-1],[2,0],[0,2],[-1,0]], [[1,-1],[2,1],[1,2],[-1,1]]] // size = 2 (2x2)
+  , [[[0,-1],[2,0],[0,2],[-1,0],[1,-1],[2,1],[1,2],[-1,1]]] // size = 2 (2x2)
 ];
 
 var toTime = function (m, actm) {
@@ -163,6 +190,84 @@ var toAmount = function (amount) {
   } while (amount > 0);
   return res.reverse().join('.').replace(/^0*/, "");
 }
+
+var requestLogger = function() {
+  injectExec( function() {
+    // console.log('Ajax logger start.');
+    const mapping = (ajax, params) => {
+      // console.log(ajax);
+      // console.log(data, vkAjax.GLOBAL.url)
+      const exceptions = ['building_info.aspx\\?id=\\d+&f=6'
+                         ,'globe.aspx\\?f=1'
+                         ,'w_clan.aspx\\?id=\\d+&s=\\d+&idp=\\d+&f=\\d+'
+                         ].map(x => new RegExp(x, 'g'));
+
+      const url = vkAjax.GLOBAL.url.toString();
+      const regex = /(dnes|včera|zítra|\d\d?\.\d\d?\.) ve? (\d\d?):(\d\d)/g;
+
+      let matches = null;
+      const o = ajax.reduce( (o, x) => {
+        if (x.attr == 'html' && exceptions.every( x => !url.match(x)) ) {
+          matches = x.val.match(regex);
+          if (matches) {
+            o.message.to = 'timeline';
+            o.message.action = 'add';
+            o.message.content = x.val.replace(/['"]/g, "'");
+            o.message.match = matches[0];
+            o.message.location = vkAjax.GLOBAL.url;
+            o.message.dateIndex = matches.index;
+          }
+        } else if (x.attr == 'function') {
+          let m = x.val.match(/'title','([^']+)'/);
+          if (m && m[1]) o.message.title = m[1];
+          // console.log(m);
+        }
+        return o;
+      }, {message: {}} );
+
+      const oStr = JSON.stringify(o).replace(/'/g, "'").replace(/"/g, "'*'")
+      return [ (!matches
+                ? ajax
+                : ajax
+                  .map( x => { x.val = x.attr != 'html'
+                    ? x.val
+                    : x.val
+                        .replace(regex, m =>
+                          `<span class='timeline_datetime'>${m}</span><span
+                              onclick="(${
+                                (() => {
+                                  const el = document.querySelector('#message');
+                                  el.value = `REPL_JSON_MESSAGE`;
+                                  let e = new Event('change');
+                                  e.target = el;
+                                  el.dispatchEvent(e);
+                                }).toString().replace('REPL_JSON_MESSAGE', oStr)
+                              })()"
+                              title="Přidat jako událost do Timeline"
+                              class="timeline_add"><b>+</b></span>
+                            `
+                    );
+                    return x;
+                  })
+                )
+      , params];
+    };
+
+    let fncBody = vkAjax.AjaxRequest.toString()
+      .replace(/\s*\/\/[^\n]*\n/g, '\n')
+      .replace(/\n+/g, '\n')
+      .replace('function (data, CallBackFunction, params) {', "if (true) {")
+      .replace(
+        'CallBackFunction(ajax, params);',
+        'CallBackFunction(...(' + mapping.toString() + ')(ajax, params));'
+      )
+      ;
+    let fnc = new Function('data', 'CallBackFunction', 'params', fncBody)
+    // console.log('####'+fnc);
+    vkAjax.AjaxRequest = eval( fnc);
+  });
+};
+
 
 var pan = {
 
@@ -272,20 +377,13 @@ var pan = {
       sections: {
         info: function() {
           let res = document.createElement('div');
-          let title = [...document.querySelectorAll('img.L2')]
-            .filter(({src:x}) => x.match(/i\/b\/(ves|c)[0-9]\w+/))
-            .map(({title: x}) => x)
-            .groupBy(x => x)
-            .map(([x,]) => x)
-            ;
-
           const areas = {'Truhlárna': [4, 'wood'], 'Kamenictví': [3, 'stone'],
                          'Kovárna': [6,'iron']};
-          let pC = x => x.tagAs('p', {style: 'text-align: center'});
           res.innerHTML = [...document.querySelectorAll('.building img')]
             .map( ({title: t}) => t.match(/([^-]+) - level (\d)( \(([^\(\)]+)\))?/) )
             .filter( x => x)
             .map( ([, c, l,, p]) => ({name: c, level: parseInt(l), player: p || ""}) )
+            .filter( ({player: p}) => !p.match(/%/))
             .sort( ({player: a}, {player: b}) => (a < b) - (b < a) )
             .filter( ({name: c}) => c in areas || 1+['Vesnice', 'Hrad'].indexOf(c) )
             .groupBy( ({player: x}) => x )
@@ -305,7 +403,7 @@ var pan = {
               + Object.entries(x).map( ([k, v]) => `(+${v/areas[k].front()})&nbsp;`
                   .tagAs('span', {
                     class: 'amount ' + areas[k].back(),
-                    // style: 'font-size: 11px',
+                    style: 'font-size: 11px',
                     title: k
                   })
               ).join('')
@@ -461,6 +559,271 @@ var pan = {
 
     },
 
+    timeline: {
+      title: 'Timeline',
+      name: 'timeline',
+
+      dynamicLine: {
+        events: [],
+        push: (...args) => {
+          // console.log(args);
+          let dynamicLine = pan.tabs.timeline.dynamicLine;
+          // order
+          dynamicLine.events = dynamicLine.events.concat(args);
+          dynamicLine.events.sort( ({time: a}, {time: b}) => b-a );
+
+          // render
+          const buildingIcon = {
+              'Aréna': 'ts*_2_1',
+              'Dům' : 'du*',
+              'Dílna': 'di*_1_1',
+              'Dřevěná palisáda': 'zdr4',
+              'Kovárna': 'kv*_1_1',
+              'Kamenictví': 'km*_1_1',
+              'Kamenná hradba': 'zk4',
+              'Katapult (stavitel)': 'kat*_1_1',
+              'Katapult': 'kat*_1_1',
+              'Portál (3)': 'po3_2_2',
+              'Portál (2)': 'po2_2_2',
+              'Portál (1)': 'po1_2_2',
+              'Radnice': 'ra*_1_2',
+              'Statek': 'fa*_1_1',
+              'Tržiště': 'tr*_1_1',
+              'Truhlárna': 'tu*_1_1',
+              'Dílna': 'di*g',
+              'Dům': 'du*g',
+              'Statek': 'fa*g',
+              'Fontána': 'fo*g',
+              'Hliněná cesta': 'ch*g',
+              'Kamenictví': 'km*g',
+              'Kamenná cesta': 'ck*g',
+              'Kasárna': 'ka*g',
+              'Kostel': 'ko*g',
+              'Kovárna': 'kv*g',
+              'Mlýn': 'ml*g',
+              'Radnice': 'ra*g',
+              'Skladiště': 'sk*g',
+              'Střelecká výspa': 'vy*g',
+              'Střelnice': 'st*g',
+              'Studna': 'su*g',
+              'Truhlárna': 'tu*g',
+              'Tržnice': 'tr*g',
+              'Univerzita': 'un*g',
+              'Velitelství klanu': 'vk*g',
+              'Vila': 'vi*g',
+              'Pila': 'pi*g',
+              'Lom': 'lo*g',
+              'Huť': 'dl*g',
+              'Portál': 'po*g',
+              'Oltář': 'olg',
+              'Skřetí doupě': 'do*g',
+              'Ohniště': 'oh*_1x1g',
+              undefined: '--'
+            };
+          const renderBody = (time, [type, title, level], body) => `
+              <div class="header">
+                <span class="o"><span></span></span>
+                <span class="date_time">${pan.tabs.timeline.printDateTime(time)}</span>
+                <span class="type">${{
+                  portal: "".tagAs('img', {
+                    src: '/i/b/po3_2_2.png',
+                    class: 'icon'
+                  }),
+                  building_info: title && "".tagAs('img', {
+                    class: 'icon',
+                    src: '/i/b/' + (buildingIcon[title] || title).replace('*', level) + '.png'
+                  }),
+                  sklizen: "".tagAs('img', {src: '/i/b/zp7.png', class: 'icon'})
+
+                }[type] || type}</span>
+              </div>
+              <div class="body">
+                ${title ? title.tagAs('h3') : ""}
+                ${body ? body.tagAs('p') : ""}
+              </div>
+              <hr>
+            `;
+          pan.tabs.timeline.content.querySelector('#dynamic_line').innerHTML = dynamicLine.events
+            .map( ({time: time, type: type, body: body}) => renderBody(time, type, body) )
+            .map( x => x.tagAs('li') )
+            .join("")
+            .tagAs('ul')
+            ;
+          // scroll
+          const kNextCount = 3
+          let el = document.querySelector('#li_now');
+          if (el) {
+            el = el.parentNode.parentNode.parentNode;
+            for (let i=0; i<kNextCount && el && el.previousSibling; ++i)
+              el = el.previousSibling;
+            el.scrollIntoView();
+          }
+        }
+      },
+
+      parseDateTime: function(str) {
+        const format = date => `${date.getDate()}.${1 + date.getMonth()}. `;
+        str = str.trim()
+          .replace(/ ve?/, "")
+          .replace('včera', format(yesterday))
+          .replace('dnes', format(today))
+          .replace('zítra', format(tomorrow))
+          .concat(' ' + today.getFullYear())
+          ;
+        const m = str.split('.');
+        const when = new Date( [m[1], m[0], m[2]].join('.') );
+        return when.getTime();
+      },
+
+      printDateTime: function(date = Date.now()) {
+        date = new Date(date);
+        date.setSeconds(0);
+        return date
+                  .toLocaleString('cs-cz', dateSettings)
+                  .replace(yesterday.toLocaleString('cs-cz', daySettings), 'včera')
+                  .replace(today.toLocaleString('cs-cz', daySettings), 'dnes')
+                  .replace(tomorrow.toLocaleString('cs-cz', daySettings), 'zítra')
+      },
+
+      newMessage: function(message) {
+        const dom = new DOMParser().parseFromString(message.content, 'text/html');
+        const [name, info] = message.title.split(/\s\-\s/, 2);
+        const [location] = message.location.split(/\./g);
+        const m = (info || "").match(/^level (\d+)|.*$/);
+        const level = m && m[1] ? m[1].toInt() : 1
+
+        // Note: /[^]/ vs /./
+        const parseContent = () => {
+          let tbody = dom.querySelector('table tbody');
+          if (message.location.match(/^building_info/) && tbody) {
+            return [...tbody.childNodes]
+              .slice(-2)
+              .map( ({innerText: x}) => x)
+              .join("")
+              .replace(/^[^]*(Budova se přestav)uje[^]*$/, `$1í ${level-1}&nbsp;➟&nbsp;${level}`)
+              .replace(/^[^]*(Budova se )(staví)[^]*$/, '$1po$2')
+              .replace(/^[^]*(Budova se )(boří)[^]*$/, '$1z$2')
+              ;
+          } else {
+            return dom.outerHTML;
+          }
+        };
+        const parseType = () => {
+          return [ location
+                 , name
+                 , level
+                 ];
+        };
+
+        let item = {
+          time: pan.tabs.timeline.parseDateTime(message.match),
+          type: parseType(),
+          body: parseContent()
+        };
+        let key = 'timeline_' + message.location + message.match;
+
+        this.tl = this.tl || {};
+        if (key in this.tl) return;
+
+        chrome.storage.sync.get(null, o => {
+          const tl = Object.entries(o).filter( ([k]) => k==key );
+          this.tl = tl;
+          o[key] = item;
+          chrome.storage.sync.set(o, () => {
+            pan.tabs.timeline.dynamicLine.push(item);
+          });
+        });
+      },
+
+      init: function() {
+        let dynamicLine = pan.tabs.timeline.dynamicLine;
+        dynamicLine.events = [];
+
+        pan.tabs.timeline.content.innerHTML =
+          [ "".tagAs('div', {id: 'time_line', class: 'line'})
+          , "".tagAs('div', {id: 'dynamic_line', class: 'line'})
+          ].join("");
+
+        // Portal dynamic events
+        const portalID = document.querySelector('#img_b_portal')
+          .parentNode.href
+          .match(/\(([^\)]+)\)/)
+          .back()
+          ;
+        const r = new XMLHttpRequest();
+        r.open('POST', `building_info.aspx?id=${portalID}&f=6`);
+        r.onload = e => {
+          const portalEvents = window.eval(r.responseText)
+            .filter( ({attr: x}) => x == 'html')
+            .map( ({val: x}) => x )
+            .map( x => x.toString() )
+            .join('')
+            .split(/\<\/tr\>/).map( x => x.replace(/(.*)\<tr[^\>]*\>/, "") )
+            .groupBy((_,i) => Math.floor(i/2) ) // group row couples
+            .map( x => x.join('').split(/\<\/td\>/).map( x => x.replace(/(.*)\<td[^\>]*\>/, "")) )
+            .init()
+            // .tee()
+            .map( ([target, timeStr, units]) => {
+              const [subj, time] = timeStr.replace(/\<[^\<]+\>/g, "").split(': ', 2);
+              return {
+                time: pan.tabs.timeline.parseDateTime(time),
+                type: ['portal', /*{
+                    'vrátil se' : 'jednotky se na
+                    ',
+                    'vrátí se': '',
+                    'v cíli bude': ,
+                    undefined: null
+                }[subj]*/ subj ],
+                body: units
+                  .replace(/\<(img)/g, '[$1')
+                  .split(/\<[^\>\<]\>/)
+                  .join("")
+                  .replace(/\[(img)/g, '<$1')
+                  // .tagAs('div')
+                  .concat( target
+                    .replace('???', "")
+                    .replace(/Cíl: (\[.+\])(.*)$/, '$2 $1')
+                    .tagAs('p', {style: 'float:right; padding-top: 4px'})
+                  )
+              };
+              }
+            )
+            ;
+          dynamicLine.push(...portalEvents);
+        };
+        r.send({});
+
+        // Field events
+        dynamicLine.push(...['dnes'].map( day =>
+          [1, 4, 7, 10, 13, 16, 19, 22].map( hour => ({
+              time: pan.tabs.timeline.parseDateTime(`${day} v ${hour}:01`),
+              type: ['sklizen', 'Sklizeň', -1],
+              body: null
+            })
+          )
+        ).flat());
+
+        // Stored events
+        chrome.storage.sync.get(null, o => {
+          const tl = Object.entries(o)
+            .filter( ([k,]) => k.match(/^timeline_/))
+            .map( ([,v]) => v)
+            ;
+          dynamicLine.push(...tl);
+        });
+
+        const now = 'dnes v ' + document.querySelector('#gui_clock_number').innerText;
+        dynamicLine.push({
+          time: pan.tabs.timeline.parseDateTime(now),
+          type: ["".tagAs('img', {src: '/i/gui/cl/c18.gif'}).tagAs('span', {id: 'li_now'})
+                , 'Současnost'
+                , -1],
+          body: null
+        });
+
+      }
+    },
+
     fights: {
       title: 'Boje',
       name: 'fights',
@@ -500,9 +863,6 @@ var pan = {
                   .map( (x, i) => i==0 ? x : x.tagAs('i').tagAs('a', {href: '#'}) )
                   .reverse()
                   .join('<br>')
-                  // .replace(/^(.*)-?(.*)$/, (_,j,a) =>  + '<br>' + j.trim())
-                  // .replace(/\s+/g, '&nbsp;')
-                  // .replace(/&nbsp;/, ' ')
                   .tagAs('div')
               , ""
                   .tagAs('img', {
@@ -569,10 +929,9 @@ var pan = {
             } else {
               ids.forEach( id => {
                 if (!oo['health_'+id]) return;
-                oo['health_'+id].filter(({time: t}) => saved.startTime <= t).forEach( h => {
-                  // console.log(id, v);
-                  pan.tabs.fights.updateGraphsWith(id, h.value, h.time);
-                });
+                oo['health_'+id].filter(({time: t}) => saved.startTime <= t).forEach( h =>
+                  pan.tabs.fights.updateGraphsWith(id, h.value, h.time)
+                );
               });
             }
           }); // forEach (ab)
@@ -643,8 +1002,8 @@ var pan = {
                   const value = allFs.find(fightFinder);
                   if (!value) {
                     alert(value);
-                    console.log(fs);
-                    console.log(strFightID);
+                    // console.log(fs);
+                    // console.log(strFightID);
                   }
                   oo.persistentFights.push(value);
                 }
@@ -960,7 +1319,7 @@ var pan = {
           });
 
         chrome.storage.local.get('post', ({post: o}) => {
-            Object.entries(o).forEach( ([id, v]) => {
+            Object.entries(o || {}).forEach( ([id, v]) => {
               form.querySelector('#'+id).value = v;
             });
         });
@@ -1050,6 +1409,7 @@ var pan = {
 
 var main = function(e) {
   with (pan) {
+    requestLogger();
 
     init();
     menu.load();
@@ -1092,6 +1452,11 @@ var main = function(e) {
     [...document.querySelectorAll('#handle a')].forEach( el =>
       el.ondblclick = ({target: ell}) => menu.handler(ell, {dblclick: true})
     );
+
+    document.querySelector('#message').addEventListener('change', ({target:el}) => {
+      let message = JSON.parse(el.value.replace(/'\*'/g, '"')).message;
+      pan.tabs.timeline.newMessage(message);
+    }, true);
 
   }
 };

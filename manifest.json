@@ -21,6 +21,9 @@
     "pan.html",
     "units.json"
   ],
+  "externally_connectable": {
+    "matches":  ["http://www.panhradu.cz/main*"]
+  },
   "permissions": [
     "storage"
   ],

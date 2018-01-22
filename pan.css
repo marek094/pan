@@ -30,6 +30,35 @@ h4, h5, h6 {
   padding-right: 10px;
 }
 
+.timeline_datetime {
+  display: inline-block;
+  border: grey dashed 1px;
+  padding: 1px 2px 1px 3px;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+.timeline_add {
+  display: inline-block;
+  font-size: 15px;
+  line-height: 1;
+  font-weight: bold;
+  border: grey dashed 1px;
+  border-left: 0;
+  padding: 0 3px 2px 3px;
+  text-decoration: none;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+.timeline_add b {
+  cursor: pointer;
+}
+
+.timeline_add:hover b {
+  /* color: #d25b44; */
+  color: #48970b;
+  display: inline-block;
+}
+
 .content {
   vertical-align: top;
   color: #dcaf67;
@@ -211,6 +240,10 @@ h1#heading:hover {
   /* background-position: -24px -16px; */
   background-image: url('/i/u/elmm_3_2.gif');
   background-position: -23px -4px;
+}
+#handle .menu a.timeline.active {
+  background-image: url('/i/u/dwo_3_3.gif');
+  background-position: -21px -10px;
 }
 
 
@@ -523,6 +556,10 @@ h1#heading:hover {
   border-top-left-radius: 18px;
 }
 
+#timeline_content img {
+  /* max-width: 24px; */
+}
+
 
 .player_name {
   font-size: 14px;
@@ -622,4 +659,179 @@ h1#heading:hover {
   margin: 0 !important;
   height: 40px;
   /* margin-top:-12px !important; */
+}
+
+#timeline_content {
+  display: flex;
+  flex-direction: row;
+}
+
+#time_line {
+  /* width: 5px; */
+  border-right: 5px black solid;
+}
+
+#dynamic_line {
+  margin-left: 10px;
+  border-left: 5px dotted #452e27;
+  /* background: fixed; */
+}
+
+#dynamic_line ul, #dynamic_line  li {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+#dynamic_line li {
+  position: relative;
+  padding-bottom: 5px;
+}
+
+#dynamic_line .header {
+  position: absolute;
+  top: 0;
+  margin-left: -15px;
+  overflow: visible;
+  height: 30px;
+  width: -webkit-calc(100% + 12px);
+  line-height: 25px;
+  padding: 0;
+}
+
+#dynamic_line .header span {
+  display: inline-block;
+}
+
+#dynamic_line .header .date_time {
+  float: left;
+  width: auto;
+  padding: 0 10px 0 25px;
+  background: #221718;
+  border-bottom-right-radius: 15px;
+}
+
+#dynamic_line .header .o {
+  float: left;
+  width: 5px;
+  height: 5px;
+  padding: 5px;
+  /* background: red; */
+  background: #2c251c;
+  /* overflow:  */
+  border-radius: 1000px;
+  border: 5px solid #231719;
+  position: absolute;
+}
+
+#dynamic_line .header .o span {
+  width: 5px;
+  height: 5px;
+  /* background: #231719; */
+  background: #d5902b;
+  border-radius: 1000px;
+  display: block;
+}
+
+#dynamic_line .header .type {
+  float: right;
+  width: auto;
+  /* max-width: 40px; */
+  padding-top: 5px;
+  position: relative;
+}
+
+#dynamic_line .header img.icon {
+  max-width: 32px;
+  background: #69702e;
+  border-radius: 14px;
+  border: 1px inset #000;
+}
+
+#dynamic_line .header .notify img.icon {
+  border-color: #59dafc;
+}
+
+#dynamic_line .header .type  span {
+  /* position: absolute; */
+  /* top: 0; */
+}
+
+#dynamic_line .header .type #li_now {
+  background: -69px -3px no-repeat url(/i/gui/bc_orloj.png);
+  width: 112px;
+  height: 112px;
+  padding: 5px 0 0 7px;
+  border-radius: 44px;
+  transform: scale(0.32142857142);
+  transform-origin: right top;
+  border: 3px solid black;
+  overflow: hidden;
+  box-sizing: border-box;
+  position: relative;
+  margin-top: -26px;
+}
+
+#dynamic_line .body {
+  padding-top: 22px;
+  padding-left: 10px;
+  /* padding-bottom: 15px; */
+  /* width: 100%; */
+  /* text-align: right; */
+  max-height: 160px;
+  overflow: scroll;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#dynamic_line hr {
+  border: 0;
+  padding-top: 8px;
+  border-bottom: 1px solid #452e28;
+  border-top: 0;
+  border-radius: 14px;
+  margin: 0;
+  height: 0;
+  width: -webkit-calc(100% - 10px);
+  box-sizing: border-box;
+  margin-left: 10px;
+}
+
+#dynamic_line .body p {
+  text-align: left;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+#dynamic_line .body h3 {
+  font-weight: normal;
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.2;
+  color: #eacd86;
+  padding: 0 0 4px 0;
+  margin: 0;
+
+}
+
+#dynamic_line .body h3:first-letter {
+    text-transform: capitalize;
+}
+
+#dynamic_line .body img {
+  max-width: 20px !important;
+  width: auto !important;
+  display: block;
+}
+
+#dynamic_line .body img:nth-child(2),
+#dynamic_line .body img:nth-child(3) {
+  display: none;
+}
+
+#dynamic_line .body .m {
+  width: auto !important;
+  height: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
