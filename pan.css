@@ -98,6 +98,7 @@ h4, h5, h6 {
 .content .units td {
   vertical-align: middle;
   padding: 2px;
+  hyphens: auto;
   /* align-items: center; */
 }
 
