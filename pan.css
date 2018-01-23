@@ -17,6 +17,10 @@
   font-family: 'Times New Roman', Times, serif;
 }
 
+#pan_extension *::-webkit-scrollbar {
+  display: none;
+}
+
 ul, li {
   padding: 0;
   margin: 0;

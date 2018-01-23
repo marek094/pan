@@ -25,6 +25,10 @@ body {
   overflow: hidden;
 }
 
+*::-webkit-scrollbar {
+  display: none;
+}
+
 .page_breaker {
   line-height: 40px;
   font-size: small;
