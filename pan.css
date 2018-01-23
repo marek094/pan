@@ -158,6 +158,19 @@ h1#heading:hover {
   background-image: url('http://www.panhradu.cz/i/u/dem_cr_v_3_3f.gif');
 }
 
+#notification {
+  position: absolute;
+  width: 110px;
+  background: #c9e0fff0;
+  color: #221718;
+  padding: 5px;
+  box-sizing: border-box;
+  border-radius: 16px;
+  border: 2px solid #2317193b;
+  margin-top: -15px;
+  margin-left: -8px;
+}
+
 #table h3 {
   padding: 0 10px;
 }
@@ -737,8 +750,11 @@ h1#heading:hover {
   float: right;
   width: auto;
   /* max-width: 40px; */
-  padding-top: 5px;
+  /* padding-top: 5px; */
+  margin-top: 5px;
   position: relative;
+  /* max-height: 50px; */
+  /* overflow: hidden */
 }
 
 #dynamic_line .header img.icon {

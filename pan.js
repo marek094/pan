@@ -220,11 +220,10 @@ var requestLogger = function() {
         } else if (x.attr == 'function') {
           let m = x.val.match(/'title','([^']+)'/);
           if (m && m[1]) o.message.title = m[1];
-          // console.log(m);
         }
         return o;
       }, {message: {}} );
-
+      console.log(o, ajax);
       const oStr = JSON.stringify(o).replace(/'/g, "'").replace(/"/g, "'*'")
       return [ (!matches
                 ? ajax
@@ -581,8 +580,8 @@ var pan = {
               'Kovárna': 'kv*_1_1',
               'Kamenictví': 'km*_1_1',
               'Kamenná hradba': 'zk4',
-              'Katapult (stavitel)': 'kat*_1_1',
-              'Katapult': 'kat*_1_1',
+              'Katapult (stavitel)': 'kat*g',
+              'Katapult': 'kat*g',
               'Portál (3)': 'po3_2_2',
               'Portál (2)': 'po2_2_2',
               'Portál (1)': 'po1_2_2',
@@ -593,32 +592,33 @@ var pan = {
               'Dílna': 'di*g',
               'Dům': 'du*g',
               'Statek': 'fa*g',
-              'Fontána': 'fo*g',
+              'Fontána': 'fo*_1_2',
               'Hliněná cesta': 'ch*g',
-              'Kamenictví': 'km*g',
+              // 'Kamenictví': 'km*g',
               'Kamenná cesta': 'ck*g',
               'Kasárna': 'ka*g',
               'Kostel': 'ko*g',
               'Kovárna': 'kv*g',
-              'Mlýn': 'ml*g',
+              'Kamenolom': 'lo*_1_3',
+              'Mlýn': 'ml*_1_1',
               'Radnice': 'ra*g',
               'Skladiště': 'sk*g',
               'Střelecká výspa': 'vy*g',
               'Střelnice': 'st*g',
               'Studna': 'su*g',
               'Truhlárna': 'tu*g',
-              'Tržnice': 'tr*g',
+              'Tržiště': 'tr*g',
               'Univerzita': 'un*g',
               'Velitelství klanu': 'vk*g',
               'Vila': 'vi*g',
-              'Pila': 'pi*g',
+              'Pila': 'pi*_2_2',
               'Lom': 'lo*g',
               'Huť': 'dl*g',
               'Portál': 'po*g',
               'Oltář': 'olg',
               'Skřetí doupě': 'do*g',
               'Ohniště': 'oh*_1x1g',
-              undefined: '--'
+              undefined: '../T/w_rybnik3_1x1'
             };
           const renderBody = (time, [type, title, level], body) => `
               <div class="header">
@@ -631,7 +631,7 @@ var pan = {
                   }),
                   building_info: title && "".tagAs('img', {
                     class: 'icon',
-                    src: '/i/b/' + (buildingIcon[title] || title).replace('*', level) + '.png'
+                    src: '/i/b/' + (buildingIcon[title] || '../T/w_rybnik3_1x1').replace('*', level) + '.png'
                   }),
                   sklizen: "".tagAs('img', {src: '/i/b/zp7.png', class: 'icon'})
 
@@ -703,6 +703,9 @@ var pan = {
               .replace(/^[^]*(Budova se přestav)uje[^]*$/, `$1í: ${level-1}&nbsp;➟&nbsp;${level}`)
               .replace(/^[^]*(Budova se )(staví)[^]*$/, '$1po$2.')
               .replace(/^[^]*(Budova se )(boří)[^]*$/, '$1z$2.')
+              .replace(/^[^]*D(okončena) b(ude)[^]*$/, 'B$2 d$1.')
+              .replace(/^[^]*(Portál pomalu nab)írá( energii)[^]*$/, '$1ere$2.')
+              .replace(/^[^]*(Katapult se pomalu nat)ahuje[^]*$/, '$1áhne.')
               ;
           } else {
             return dom.outerHTML;
