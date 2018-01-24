@@ -124,22 +124,26 @@ h4, h5, h6 {
   text-align: right;
 }
 
-.content .units .unit_info {
-  width: 34px;
+.content .units .rank {
   height: 19px;
-  text-align: right;
+  width: 34px;
+  padding: 3px 0 0 2px;
+  text-align: left;
   margin: -4px 0 0 3px;
   border-bottom-right-radius: 3px;
   border-bottom-left-radius: 3px;
-  background: no-repeat 2px 3px;
+  background: no-repeat 14px 6px;
   background-color: #61503b;
-  /* padding: 5px 2px 2px 2px; */
+  box-sizing: border-box;
 }
 
-.content .units .rank {
-  width: 34px;
-  height: 19px;
+.content .units .unit_info {
+  text-align: right;
   background: no-repeat 14px 6px;
+}
+
+.content .units .unit_info.dead{
+  filter: grayscale(100%) contrast(200%);
 }
 
 #table {
@@ -306,6 +310,10 @@ h1#heading:hover {
   font-weight: bold;
   text-align: right;
   /* padding-right: 10px; */
+}
+
+.storage {
+  color: #eacd86;
 }
 
 .content table.amounts {
@@ -764,6 +772,7 @@ h1#heading:hover {
 
 #dynamic_line .header img.icon {
   max-width: 32px;
+  min-height: 32px;
   background: #69702e;
   border-radius: 14px;
   border: 1px inset #000;
