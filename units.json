@@ -123,6 +123,16 @@
   "selsv": "icm_893",
   "selch": "icm_894",
 
+  "hrzl" : "icm_912",
+  "hrb" : "icm_912",
+  "hrc" : "icm_913",
+  "hrm" : "icm_914",
+  "hrz" : "icm_915",
+
+  "yetti_s": "icm_920",
+  "yetti_m": "icm_921",
+  "yetti_b": "icm_922",
+
   "sered" : "icm_923",
 
   "elmr" : "icm_931",
@@ -136,6 +146,7 @@
   "elvb" : "icm_943",
   "elvc" : "icm_944",
   "elvz" : "icm_945",
+
 
   "dem_cr_m" : "icm_971",
   "dem_zl_m" : "icm_972",

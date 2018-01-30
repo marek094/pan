@@ -49,6 +49,7 @@ String.prototype.ifEmpty = function (val) {
 }
 
 String.prototype.tagAs = function (tag, args) { // k=='style' ? v : v
+  if (tag == null) return this;
   let serialize = a => Object.entries(a).map(([k, v])=>`${k}="${v}"`).join("");
   let res = '<' + tag;
   if (args) {
@@ -158,7 +159,7 @@ var injectExec = function(codeLambda, doc) {
 const dirs =
   [ []
   , [[[0,-1],[1,0],[0,1],[-1,0]]] // size = 1 (1x1)
-  , [[[0,-1],[2,0],[0,2],[-1,0],[1,-1],[2,1],[1,2],[-1,1]]] // size = 2 (2x2)
+  , [[[0,-1],[2,0],[0,2],[-1,0]],[[1,-1],[2,1],[1,2],[-1,1]]] // size = 2 (2x2)
 ];
 
 var toTime = function (m, actm) {
@@ -191,81 +192,80 @@ var toAmount = function (amount) {
   return res.reverse().join('.').replace(/^0*/, "");
 }
 
-var requestLogger = function() {
-  injectExec( function() {
-    // console.log('Ajax logger start.');
-    const mapping = (ajax, params) => {
-      // console.log(ajax);
-      // console.log(data, vkAjax.GLOBAL.url)
-      const exceptions = ['building_info.aspx\\?id=\\d+&f=6'
-                         ,'globe.aspx\\?f=1'
-                         ,'w_clan.aspx\\?id=\\d+&s=\\d+&idp=\\d+&f=\\d+'
-                         ].map(x => new RegExp(x, 'g'));
+var requestLogger = () => injectExec( function() {
+  // console.log('Ajax logger start.');
+  const mapping = (ajax, params) => {
+    // console.log(ajax);
+    // console.log(data, vkAjax.GLOBAL.url)
+    const exceptions = ['building_info.aspx\\?id=\\d+&f=6'
+                       ,'globe.aspx\\?f=1'
+                       ,'w_clan.aspx\\?id=\\d+&s=\\d+&idp=\\d+&f=\\d+'
+                       ].map(x => new RegExp(x, 'g'));
 
-      const url = vkAjax.GLOBAL.url.toString();
-      const regex = /(dnes|včera|zítra|\d\d?\.\d\d?\.) ve? (\d\d?):(\d\d)/g;
+    const url = vkAjax.GLOBAL.url.toString();
+    const regex = /(dnes|včera|zítra|\d\d?\.\d\d?\.) ve? (\d\d?):(\d\d)/g;
 
-      let matches = null;
-      const o = ajax.reduce( (o, x) => {
-        if (x.attr == 'html' && exceptions.every( x => !url.match(x)) ) {
-          matches = x.val.match(regex);
-          if (matches) {
-            o.message.to = 'timeline';
-            o.message.action = 'add';
-            o.message.content = x.val.replace(/['"]/g, "'");
-            o.message.match = matches[0];
-            o.message.location = vkAjax.GLOBAL.url;
-            o.message.dateIndex = matches.index;
-          }
-        } else if (x.attr == 'function') {
-          let m = x.val.match(/'title','([^']+)'/);
-          if (m && m[1]) o.message.title = m[1];
+    let matches = null;
+    const o = ajax.reduce( (o, x) => {
+      if (x.attr == 'html' && exceptions.every( x => !url.match(x)) ) {
+        matches = x.val.match(regex);
+        if (matches) {
+          o.message.to = 'timeline';
+          o.message.action = 'add';
+          o.message.content = x.val.replace(/['"]/g, "'");
+          o.message.match = matches[0];
+          o.message.location = vkAjax.GLOBAL.url;
+          o.message.dateIndex = matches.index;
         }
-        return o;
-      }, {message: {}} );
-      console.log(o, ajax);
-      const oStr = JSON.stringify(o).replace(/'/g, "'").replace(/"/g, "'*'")
-      return [ (!matches
-                ? ajax
-                : ajax
-                  .map( x => { x.val = x.attr != 'html'
-                    ? x.val
-                    : x.val
-                        .replace(regex, m =>
-                          `<span class='timeline_datetime'>${m}</span><span
-                              onclick="(${
-                                (() => {
-                                  const el = document.querySelector('#message');
-                                  el.value = `REPL_JSON_MESSAGE`;
-                                  let e = new Event('change');
-                                  e.target = el;
-                                  el.dispatchEvent(e);
-                                }).toString().replace('REPL_JSON_MESSAGE', oStr)
-                              })()"
-                              title="Přidat jako událost do Timeline"
-                              class="timeline_add"><b>+</b></span>
-                            `
-                    );
-                    return x;
-                  })
-                )
-      , params];
-    };
+      } else if (x.attr == 'function') {
+        let m = x.val.match(/'title','([^']+)'/);
+        if (m && m[1]) o.message.title = m[1];
+      }
+      return o;
+    }, {message: {}} );
+    console.log(o, ajax);
+    const oStr = JSON.stringify(o).replace(/'/g, "'").replace(/"/g, "'*'")
+    return [ (!matches
+              ? ajax
+              : ajax
+                .map( x => { x.val = x.attr != 'html'
+                  ? x.val
+                  : x.val
+                      .replace(regex, m =>
+                        `<span class='timeline_datetime'>${m}</span><span
+                            onclick="(${
+                              (() => {
+                                const el = document.querySelector('#message');
+                                el.value = `REPL_JSON_MESSAGE`;
+                                let e = new Event('change');
+                                e.target = el;
+                                el.dispatchEvent(e);
+                              }).toString().replace('REPL_JSON_MESSAGE', oStr)
+                            })()"
+                            title="Přidat jako událost do Timeline"
+                            class="timeline_add"><b>+</b></span>
+                          `
+                  );
+                  return x;
+                })
+              )
+    , params];
+  };
 
-    let fncBody = vkAjax.AjaxRequest.toString()
-      .replace(/\s*\/\/[^\n]*\n/g, '\n')
-      .replace(/\n+/g, '\n')
-      .replace('function (data, CallBackFunction, params) {', "if (true) {")
-      .replace(
-        'CallBackFunction(ajax, params);',
-        'CallBackFunction(...(' + mapping.toString() + ')(ajax, params));'
-      )
-      ;
-    let fnc = new Function('data', 'CallBackFunction', 'params', fncBody)
-    // console.log('####'+fnc);
-    vkAjax.AjaxRequest = eval( fnc);
-  });
-};
+  let fncBody = vkAjax.AjaxRequest.toString()
+    .replace(/\s*\/\/[^\n]*\n/g, '\n')
+    .replace(/\n+/g, '\n')
+    .replace('function (data, CallBackFunction, params) {', "if (true) {")
+    .replace(
+      'CallBackFunction(ajax, params);',
+      'CallBackFunction(...(' + mapping.toString() + ')(ajax, params));'
+    )
+    ;
+  let fnc = new Function('data', 'CallBackFunction', 'params', fncBody)
+  // console.log('####'+fnc);
+  vkAjax.AjaxRequest = eval( fnc);
+});
+
 
 
 var pan = {
@@ -377,7 +377,7 @@ var pan = {
         info: function() {
           let res = document.createElement('div');
           const areas = {'Truhlárna': [4, 'wood'], 'Kamenictví': [3, 'stone'],
-                         'Kovárna': [6,'iron']};
+                         'Kovárna': [6,'iron'], 'Skladiště': [6/3, 'storage']};
           res.innerHTML = [...document.querySelectorAll('.building img')]
             .map( ({title: t}) => t.match(/([^-]+) - level (\d)( \(([^\(\)]+)\))?/) )
             .filter( x => x)
@@ -399,11 +399,14 @@ var pan = {
                 : 'Tvoje území'
               )
               + '<br>'
-              + Object.entries(x).map( ([k, v]) => `(+${v/areas[k].front()})&nbsp;`
+              + Object.entries(x).map( ([k, v]) => ( k != 'Skladiště'
+                    ? `(+${v/areas[k].front()})&nbsp;`
+                    : v ? `≤${v/areas[k].front()}k` : ""
+                  )
                   .tagAs('span', {
                     class: 'amount ' + areas[k].back(),
                     style: 'font-size: 11px',
-                    title: k
+                    title: k != 'Skladiště' ? k : k + ' (v tisících)'
                   })
               ).join('')
             )
@@ -466,13 +469,33 @@ var pan = {
             })
             ;
 
-          const content = units
+          const deadUnits = [...document.querySelectorAll('.D[src$="d.gif"]')]
+            .map(img => ({attack: "", defence: "", player: '=', clan: 'Záhrobí', val: {
+                  id: '--',
+                  isDead: true,
+                  firstChild: (() => {
+                    img.title = 'Mrtvola';
+                    img.dataset = {};
+                    return img;
+                  })(),
+                  querySelector: v => ({ src: v == '.R'
+                    ? `/i/s/r${img.src.match(/\d_(\d)d\.gif$/)[1] * 3 - 2 }.gif`
+                    : v == '.F'
+                    ? '/i/e/r1.gif'
+                    : ""
+                  })
+                }
+              })
+            )
+            ;
+
+          const content = [...units, ...deadUnits]
             .map(o => {
               const x = o.val;
               const img = x.firstChild.cloneNode({deepCopy: true}.deepCopy);
               img.dataset.id = o.val.id.slice(1);
               img.src = (() => {
-                let m = img.src.match(/\/i\/u\/(\w+)_\d_\df?s?\.gif$/);
+                let m = img.src.match(/\/i\/u\/(\w+)_\d_\d[fsd]{0,2}\.gif$/);
                 return m && unitsTable[m[1]]
                   ? `/i/u/${unitsTable[m[1]]}.png`
                   : img.src;
@@ -481,16 +504,25 @@ var pan = {
               const attrs = {class: 'opaciable', 'data-player': o.player};
               return [img.outerHTML
                         .tagAs('div', attrs)
-                        .concat( "".tagAs('div', {
-                          class: 'rank',
-                          'data-player': o.player,
-                          title: `${o.player} (${o.clan})`,
-                          style: `background-image: url(${x.querySelector('.R').src})`
-                        }).tagAs('div', {
-                          class: 'unit_info opaciable',
-                          'data-player': o.player,
-                          style: `background-image: url(${x.querySelector('.F').src})`
-                        }))
+                        .concat( "".tagAs('img', {
+                            class: 'unit_info opaciable' + (x.isDead ? ' dead' : ""),
+                            'data-player': o.player,
+                            src: x.querySelector('.F').src
+                          }).concat( x.isDead
+                              ? "".tagAs('img', {
+                                  class: 'dead_cross opaciable',
+                                  src: '/i/s/kriz_anim.gif',
+                                  'data-player': o.player,
+                                })
+                              : ""
+                          )
+                          .tagAs('div', {
+                            class: 'rank opaciable',
+                            'data-player': o.player,
+                            title: `${o.player} (${o.clan})`,
+                            style: `background-image: url(${x.querySelector('.R').src})`
+                          })
+                        )
                      , o.attack.toString().concat('<br>').concat(o.defence).tagAs('div', attrs)
                      , name
                         .replace('Raněný zbrojnoš Béďa', 'Zbrojnoš Béďa')
@@ -574,6 +606,7 @@ var pan = {
           // render
           const buildingIcon = {
               'Aréna': 'ts*_2_1',
+              'Alchymistická dílna': 'alch_ag',
               'Dům' : 'du*',
               'Dílna': 'di*_1_1',
               'Dřevěná palisáda': 'zdr4',
@@ -591,6 +624,7 @@ var pan = {
               'Truhlárna': 'tu*_1_1',
               'Dílna': 'di*g',
               'Dům': 'du*g',
+              'Dělo': 'dem*_hlaven_L.gif#',
               'Statek': 'fa*g',
               'Fontána': 'fo*_1_2',
               'Hliněná cesta': 'ch*g',
@@ -618,9 +652,15 @@ var pan = {
               'Oltář': 'olg',
               'Skřetí doupě': 'do*g',
               'Ohniště': 'oh*_1x1g',
+              'food': '../s/food.gif',
+              'iron': '../s/iron.gif',
+              'wood': '../s/wood.gif',
+              'stone': '../s/stone.gif',
               undefined: '../T/w_rybnik3_1x1'
             };
-          const renderBody = (time, [type, title, level], body) => `
+          const renderBody = (time,
+                              {0: type, 1: title, 2: level},
+                              body) => `
               <div class="header">
                 <span class="o"><span></span></span>
                 <span class="date_time">${pan.tabs.timeline.printDateTime(time)}</span>
@@ -629,9 +669,11 @@ var pan = {
                     src: '/i/b/po3_2_2.png',
                     class: 'icon'
                   }),
-                  building_info: title && "".tagAs('img', {
+                  building_info: "".tagAs('img', {
                     class: 'icon',
-                    src: '/i/b/' + (buildingIcon[title] || '../T/w_rybnik3_1x1').replace('*', level) + '.png'
+                    src: '/i/b/'
+                          + (buildingIcon[title] || buildingIcon[undefined]).replace('*', level)
+                          + '.png'
                   }),
                   sklizen: "".tagAs('img', {src: '/i/b/zp7.png', class: 'icon'})
 
@@ -700,12 +742,14 @@ var pan = {
               .slice(-2)
               .map( ({innerText: x}) => x)
               .join("")
-              .replace(/^[^]*(Budova se přestav)uje[^]*$/, `$1í: ${level-1}&nbsp;➟&nbsp;${level}`)
+              .replace(/^[^]*(Budova se přestav)uje[^]*$/, `$1í: <b>${level-1}&nbsp;➟&nbsp;${level}</b>`)
               .replace(/^[^]*(Budova se )(staví)[^]*$/, '$1po$2.')
               .replace(/^[^]*(Budova se )(boří)[^]*$/, '$1z$2.')
               .replace(/^[^]*D(okončena) b(ude)[^]*$/, 'B$2 d$1.')
               .replace(/^[^]*(Portál pomalu nab)írá( energii)[^]*$/, '$1ere$2.')
               .replace(/^[^]*(Katapult se pomalu nat)ahuje[^]*$/, '$1áhne.')
+              .replace(/^[^]*(Další výstřel )je( možný)[^]*$/, '$1bude$2.')
+              .replace(/^[^]*D(alší arénu) m(ůžeš založit )až[^]*$/, 'M$2d$1')
               ;
           } else {
             return dom.outerHTML;
@@ -815,6 +859,7 @@ var pan = {
           dynamicLine.push(...tl);
         });
 
+        // now
         const now = 'dnes v ' + document.querySelector('#gui_clock_number').innerText;
         dynamicLine.push({
           time: pan.tabs.timeline.parseDateTime(now),
@@ -823,6 +868,83 @@ var pan = {
                 , -1],
           body: null
         });
+
+        // const capacity = parseInt(document.getElementById('max_capacity').innerHTML);
+        // const fortune = ['gold', 'food', 'wood', 'stone', 'iron'].map( x => { return {
+        //   type: x,
+        //   amount: parseInt( document.getElementById('mb_' + x).innerText
+        //                       .split('').filter(x=>x!='.').join('')
+        //           ),
+        //   inc: parseInt( document.getElementById('mb_' + x + '_i').innerText )
+        // };});
+        //
+        // pan.tabs.resources.content.innerHTML = fortune
+        //     .map(({type:t}) => "".tagAs('tbody', {id: 'table_' + t}))
+        //     .join("")
+        //     .tagAs('table', {class: 'amounts'});
+        //
+        // fortune.forEach( x => {
+        //   const result = pan.tabs.resources.content.querySelector('#table_' + x.type);
+        //   serverTime().then( time => {
+        //     const actm = (time[2] * 24 + time[3]) * 60 + time[4];
+        //     // alert(actm)
+        //     if (x.type == 'food') {
+        //       // const foodVals = { 'Obilné pole': 5000, 'Zeleninová zahrádka': 450 };
+        //       // const foodSteps = 7;
+        //       // const regExp = new RegExp('(' + Object.keys(foodVals).join('|') + ') \\((\\d)\\)[^\\(]*$');
+        //       // const docPs = [lCastle,...lDorp].map(locatedDoc);
+        //       // const mod = (x,y) => Math.floor(x/y);
+        //       // const remains = h => h==0 ? 0 : (mod(time[3]-1+h,3) * 3 + 1 - time[3]) * 60 - time[4];
+        //       // const cca = '~'.tagAs('small');
+        //       // Promise.all(docPs).then( docs => {
+        //       //   result.innerHTML += docs
+        //       //     .map(d => Array.from(d.querySelectorAll('div.L2.building'))
+        //       //       .map( b => b.querySelector('img') )
+        //       //       .map( ({title: x}) => x.match(regExp))
+        //       //       .filter( x => x != null )
+        //       //       .map( ([, t, l]) => [t, parseInt(l)])
+        //       //     )
+        //       //     .flat()
+        //       //     .sort( ([,a], [,b]) => b - a)
+        //       //     .groupBy( ([,a]) => a)
+        //       //     .map( xs => [ remains((foodSteps - xs[0][1]) * 3)
+        //       //                 , xs.reduce( (v, [t,]) => foodVals[t]+v, 0)]
+        //       //     )
+        //       //     .reduce( ([xs,lv], [h,v]) => [[...xs, tr(cca+toAmount(lv+v), toTime(h, actm))], lv+v]
+        //       //            , [[], x.amount]
+        //       //     )
+        //       //     .shift()
+        //       //     .join("")
+        //       //     ;
+        //       //   });
+        //     } else { // x.type != 'food'
+        //       const amounts = [1000, 2000, 3000, 5000, 8000, 10000, 12000,
+        //                        15000, 20000, 25000, 30000, 35000, 40000, 45000,
+        //                        50000, 55000, 60000, 70000, 80000, 90000, 1000000];
+        //       const time = y => (y-x.amount)/x.inc;
+        //       dynamicLine.push(...amounts
+        //         .filter( v => x.amount <= v && v < capacity)
+        //         .filter( function(v, i, a) {
+        //           if (i == 0 || time(v) - time(a[this.last]) >= 60) {
+        //             this.last = i;
+        //             return true;
+        //           }
+        //           return false;
+        //         })
+        //         .concat([capacity])
+        //         .slice(0, 5)
+        //         .map( v => parseInt(v))
+        //         .map( v => ({
+        //             time: time(v),
+        //             type: {isResource: true, type: x.type, 1: x.type, 2: 'true',
+        //                    0: x.type, img: '../s/food.gif#'},
+        //             body: toAmount(v) + ' ' + toTime(time(v), actm)
+        //           })
+        //         )
+        //       );
+        //     }
+        //   });
+        // });
 
       }
     },

@@ -115,6 +115,7 @@ h4, h5, h6 {
   cursor: pointer;
   text-align: center;
   line-height: 12px;
+  position: relative;
 }
 .content .units td:first-child img {
   max-width: 40px;
@@ -140,10 +141,19 @@ h4, h5, h6 {
 .content .units .unit_info {
   text-align: right;
   background: no-repeat 14px 6px;
+  background-color: transparent;
+  /* height: 19px; */
+  /* width: 34px;   */
 }
 
-.content .units .unit_info.dead{
+.content .units .unit_info.dead {
   filter: grayscale(100%) contrast(200%);
+}
+
+.content .units .dead_cross {
+  position: absolute;
+  top: 9px;
+  left: 11px;
 }
 
 #table {
